@@ -2,19 +2,13 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-const ffmpegProcesses = {}; // Mapa para almacenar procesos de FFmpeg por ID
+// Mapa para almacenar procesos de FFmpeg por su ID
+const ffmpegProcesses = {};
 
-// Ruta estática para el directorio de logs en la raíz del proyecto
+// Ruta estática para el directorio de logs
 const logsFolder = path.join(__dirname, '../../logs');
 
-// Asegurarse de que el directorio de logs exista
-if (!fs.existsSync(logsFolder)) {
-    fs.mkdirSync(logsFolder, { recursive: true });
-    console.log(`Directorio de logs creado: ${logsFolder}`);
-}
-
 /**
- * Inicia un proceso FFmpeg para un flujo específico.
  * @param {string} id - ID único para identificar el flujo.
  * @param {string} inputUrl - URL o archivo de entrada.
  * @param {string} outputFolder - Carpeta donde se generarán los archivos HLS.
@@ -25,21 +19,22 @@ const startFFmpeg = (id, inputUrl, outputFolder, additionalParams = []) => {
     const streamOutputFolder = path.join(outputFolder, id);
     if (!fs.existsSync(streamOutputFolder)) {
         fs.mkdirSync(streamOutputFolder, { recursive: true });
-        console.log(`Directorio creado: ${streamOutputFolder}`);
+        console.log(`[FFmpeg - ${id}] Directory created: ${streamOutputFolder}`);
     }
 
+    // Abrimos el fichero de logs
     const logFilePath = path.join(logsFolder, `${id}.log`);
     const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Abrir en modo append
 
-    //Reinicia el proceso si ya existía
+    // Reinicia el proceso si ya existía
     if (ffmpegProcesses[id]) {
-        console.log(`FFmpeg ya está corriendo para el ID: ${id}. Deteniéndolo...`);
+        console.log(`[FFmpeg - ${id}] Was already running. Stopping...`);
         ffmpegProcesses[id].kill('SIGINT'); // Detener proceso anterior
     }
 
-    console.log(`Iniciando FFmpeg para ID: ${id}, URL: ${inputUrl}...`);
+    console.log(`[FFmpeg - ${id}] Starting on URL: ${inputUrl}`);
 
-    //Creamos la línea de argumentos
+    // Creamos la línea de argumentos
     const ffmpegArgs = [
         '-i', inputUrl,
         ...additionalParams,
@@ -54,11 +49,10 @@ const startFFmpeg = (id, inputUrl, outputFolder, additionalParams = []) => {
     ffmpegProcesses[id] = process;
 
     // Redirigir logs a archivo
-    process.stderr.on('data', (data) => logStream.write(`[${id}] FFmpeg Error: ${data.toString()}\n`));
-    process.stdout.on('data', (data) => logStream.write(`[${id}] FFmpeg Log: ${data.toString()}\n`));
+    process.stderr.on('data', (data) => logStream.write(`${data.toString()}\n`));
 
     process.on('close', (code) => {
-        console.log(`[${id}] FFmpeg terminó con código ${code}`);
+        console.log(`[FFmpeg - ${id}] Finished with code: ${code}`);
         delete ffmpegProcesses[id]; // Limpia la referencia
     });
 
@@ -71,11 +65,11 @@ const startFFmpeg = (id, inputUrl, outputFolder, additionalParams = []) => {
  */
 const stopFFmpeg = (id) => {
     if (ffmpegProcesses[id]) {
-        console.log(`Deteniendo FFmpeg para ID: ${id}...`);
+        console.log(`[FFmpeg - ${id}] Stopping...`);
         ffmpegProcesses[id].kill('SIGINT');
         delete ffmpegProcesses[id];
     } else {
-        console.log(`No hay procesos de FFmpeg corriendo para ID: ${id}.`);
+        console.log(`[FFmpeg - ${id}] Process does not exist`);
     }
 };
 

@@ -1,10 +1,10 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-//Script para la ejecución de FFmpeg
-const { startFFmpeg } = require('./controllers/ffmpegRunner');
 //Fichero con configuraciones varias
 const config = require('../config/default');
+//Script para la ejecución de FFmpeg
+const { startFFmpeg } = require('./controllers/ffmpegRunner');
 
 const app = express();
 
@@ -18,7 +18,6 @@ if (!fs.existsSync(logsFolder)) {
     fs.mkdirSync(logsFolder, { recursive: true });
 }
 
-
 // Configuración de la carpeta pública (html, css...)
 const staticFolder = path.resolve(config.server.staticFolder);
 app.use(express.static(staticFolder));
@@ -30,7 +29,7 @@ app.use('/hls/:id', (req, res, next) => {
     if (fs.existsSync(streamPath)) {
         express.static(streamPath)(req, res, next); // Sirve los archivos desde el subdirectorio correspondiente
     } else {
-        res.status(404).send('Flujo no encontrado');
+        res.status(404).send('Stream not found');
     }
 });
 
@@ -41,5 +40,5 @@ startFFmpeg('stream2', 'http://192.168.0.8:8080/video', baseOutputFolder, ['-hls
 // Iniciar el servidor
 const port = config.server.port;
 app.listen(port, () => {
-    console.log(`Servidor corriendo en http://localhost:${port}`);
+    console.log(`\nServer running on http://localhost:${port}\n`);
 });
