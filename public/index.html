@@ -3,14 +3,49 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proyecto de Videovigilancia</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>Multiple Streams</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 
 <body>
-    <h1>Bienvenido a la interfaz de videovigilancia</h1>
-    <script src="/js/scripts.js"></script>
+    <h1>Streaming en Vivo (Múltiples Flujos)</h1>
+    <div id="videos"></div>
+    <script>
+        // IDs de los flujos
+        const streams = ['stream1', 'stream2']; // Añade más IDs según lo necesario
+        const videosContainer = document.getElementById('videos');
+
+        streams.forEach(streamId => {
+            // Crear un contenedor para cada video
+            const videoWrapper = document.createElement('div');
+            videoWrapper.style.marginBottom = '20px';
+
+            const title = document.createElement('h3');
+            title.innerText = `Flujo: ${streamId}`;
+            videoWrapper.appendChild(title);
+
+            const video = document.createElement('video');
+            video.controls = true;
+            video.autoplay = true;
+            video.width = 640;
+            video.height = 360;
+
+            // Ruta HLS para este flujo
+            const videoSrc = `/hls/${streamId}/output.m3u8`;
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(videoSrc);
+                hls.attachMedia(video);
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = videoSrc;
+            } else {
+                console.error(`El navegador no soporta HLS para el flujo: ${streamId}`);
+            }
+
+            videoWrapper.appendChild(video);
+            videosContainer.appendChild(videoWrapper);
+        });
+    </script>
 </body>
 
 </html>

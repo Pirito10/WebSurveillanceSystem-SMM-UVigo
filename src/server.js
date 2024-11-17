@@ -1,57 +1,45 @@
 const express = require('express');
 const path = require('path');
-const { startFFmpeg, stopFFmpeg } = require('./ffmpegRunner');
+const fs = require('fs');
+//Script para la ejecución de FFmpeg
+const { startFFmpeg } = require('./controllers/ffmpegRunner');
+//Fichero con configuraciones varias
+const config = require('../config/default');
 
 const app = express();
-const outputFolder = path.join(__dirname, '../output'); // Carpeta donde se guardan los archivos HLS
-const inputUrl = 'http://192.168.0.7:8080/video'; // URL del flujo de entrada
 
-// Inicia FFmpeg al arrancar el servidor
-startFFmpeg(inputUrl, outputFolder);
+// Crear los directorios necesarios
+const baseOutputFolder = path.resolve(config.paths.outputFolder); //Directorio output (para los flujos de vídeo)
+const logsFolder = path.resolve(config.paths.logsFolder); //Directorio de logs
+if (!fs.existsSync(baseOutputFolder)) {
+    fs.mkdirSync(baseOutputFolder, { recursive: true });
+}
+if (!fs.existsSync(logsFolder)) {
+    fs.mkdirSync(logsFolder, { recursive: true });
+}
 
-// Servir los archivos HLS
-app.use('/hls', express.static(outputFolder));
 
-// Página principal para mostrar el video
-app.get('/', (req, res) => {
-    res.send(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <title>HLS Streaming</title>
-            <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-        </head>
-        <body>
-            <h1>Streaming en Vivo</h1>
-            <video id="video" controls autoplay width="640" height="360"></video>
-            <script>
-                const video = document.getElementById('video');
-                const videoSrc = '/hls/output.m3u8';
+// Configuración de la carpeta pública (html, css...)
+const staticFolder = path.resolve(config.server.staticFolder);
+app.use(express.static(staticFolder));
 
-                if (Hls.isSupported()) {
-                    const hls = new Hls();
-                    hls.loadSource(videoSrc);
-                    hls.attachMedia(video);
-                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                    video.src = videoSrc; // Para navegadores con soporte nativo HLS (Safari)
-                } else {
-                    console.error('El navegador no soporta HLS.');
-                }
-            </script>
-        </body>
-        </html>
-    `);
+// Servir los archivos HLS de cada flujo dinámicamente
+app.use('/hls/:id', (req, res, next) => {
+    const streamId = req.params.id;
+    const streamPath = path.join(baseOutputFolder, streamId);
+    if (fs.existsSync(streamPath)) {
+        express.static(streamPath)(req, res, next); // Sirve los archivos desde el subdirectorio correspondiente
+    } else {
+        res.status(404).send('Flujo no encontrado');
+    }
 });
 
-// Ruta para detener FFmpeg manualmente (opcional)
-app.get('/stop-ffmpeg', (req, res) => {
-    stopFFmpeg();
-    res.send('FFmpeg detenido.');
-});
+// Iniciar dos flujos al arrancar el servidor
+startFFmpeg('stream1', 'http://192.168.0.7:8080/video', baseOutputFolder, ['-hls_time', config.ffmpeg.hlsTime.toString(), '-hls_playlist_type', config.ffmpeg.hlsPlaylistType]);
+startFFmpeg('stream2', 'http://192.168.0.8:8080/video', baseOutputFolder, ['-hls_time', config.ffmpeg.hlsTime.toString(), '-hls_playlist_type', config.ffmpeg.hlsPlaylistType]);
 
 // Iniciar el servidor
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+const port = config.server.port;
+app.listen(port, () => {
+    console.log(`Servidor corriendo en http://localhost:${port}`);
 });
