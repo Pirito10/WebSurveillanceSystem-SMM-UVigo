@@ -20,10 +20,9 @@ module.exports = {
         ],
         hlsParams: [
             '-f', 'hls', // Formato de salida
-            '-hls_time', '4', // Duración de los segmentos
-            '-hls_list_size', '6', // Número máximo de segmentos en la lista
-            '-hls_playlist_type', 'event', // Tipo de lista (event, vod, live)
-            '-hls_flags', 'delete_segments+append_list', // Flags adicionales para HLS
+            '-hls_time', '1', // Duración de los segmentos
+            '-hls_list_size', '3', // Número máximo de segmentos en la lista
+            '-hls_flags', 'delete_segments+append_list+split_by_time', // Flags adicionales para HLS
         ],
     },
 };
