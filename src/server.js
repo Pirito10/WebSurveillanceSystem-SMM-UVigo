@@ -5,6 +5,7 @@ const fs = require('fs');
 const config = require('../config/default');
 //Script para la ejecución de FFmpeg
 const { startFFmpeg } = require('./controllers/ffmpegRunner');
+const { log } = require('console');
 
 const app = express();
 
@@ -13,9 +14,11 @@ const baseOutputFolder = path.resolve(config.paths.outputFolder); //Directorio o
 const logsFolder = path.resolve(config.paths.logsFolder); //Directorio de logs
 if (!fs.existsSync(baseOutputFolder)) {
     fs.mkdirSync(baseOutputFolder, { recursive: true });
+    console.log(`[Server] Directory created: ${baseOutputFolder}`);
 }
 if (!fs.existsSync(logsFolder)) {
     fs.mkdirSync(logsFolder, { recursive: true });
+    console.log(`[Server] Directory created: ${logsFolder}`);
 }
 
 // Configuración de la carpeta pública (html, css...)
@@ -34,11 +37,11 @@ app.use('/hls/:id', (req, res, next) => {
 });
 
 // Iniciar dos flujos al arrancar el servidor
-startFFmpeg('stream1', 'http://192.168.0.7:8080/video', baseOutputFolder, ['-hls_time', config.ffmpeg.hlsTime.toString(), '-hls_playlist_type', config.ffmpeg.hlsPlaylistType]);
-startFFmpeg('stream2', 'http://192.168.0.8:8080/video', baseOutputFolder, ['-hls_time', config.ffmpeg.hlsTime.toString(), '-hls_playlist_type', config.ffmpeg.hlsPlaylistType]);
+startFFmpeg('stream1', 'http://192.168.0.7:8080/video');
+startFFmpeg('stream2', 'http://192.168.0.8:8080/video');
 
 // Iniciar el servidor
 const port = config.server.port;
 app.listen(port, () => {
-    console.log(`\nServer running on http://localhost:${port}\n`);
+    console.log(`\n[Server] Server running on http://localhost:${port}\n`);
 });

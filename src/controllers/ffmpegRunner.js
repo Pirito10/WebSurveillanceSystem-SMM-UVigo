@@ -1,26 +1,39 @@
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const config = require('../../config/default');
 
 // Mapa para almacenar procesos de FFmpeg por su ID
 const ffmpegProcesses = {};
 
-// Ruta estática para el directorio de logs
-const logsFolder = path.join(__dirname, '../../logs');
+// Ruta estática para el directorio de logs y de salida
+const logsFolder = path.resolve(config.paths.logsFolder);
+const outputFolder = path.resolve(config.paths.outputFolder);
 
-/**
- * @param {string} id - ID único para identificar el flujo.
- * @param {string} inputUrl - URL o archivo de entrada.
- * @param {string} outputFolder - Carpeta donde se generarán los archivos HLS.
- * @param {Array<string>} additionalParams - Lista de parámetros personalizados para FFmpeg.
- */
-const startFFmpeg = (id, inputUrl, outputFolder, additionalParams = []) => {
+// Función para construír el parámetro de ejecución de FFmpeg
+const buildFfmpegParams = (id, inputUrl) => {
+
     // Crear subdirectorio para el ID si no existe
     const streamOutputFolder = path.join(outputFolder, id);
     if (!fs.existsSync(streamOutputFolder)) {
         fs.mkdirSync(streamOutputFolder, { recursive: true });
         console.log(`[FFmpeg - ${id}] Directory created: ${streamOutputFolder}`);
     }
+
+    // Obtenemos las configuraciones y la ruta al fichero de salida
+    const ffmpegConfig = config.ffmpeg;
+    const outputFile = path.join(streamOutputFolder, 'output.m3u8'); // Archivo de salida HLS
+
+    return [
+        '-i', inputUrl, // URL de entrada
+        ...ffmpegConfig.baseParams, // Parámetros básicos
+        ...ffmpegConfig.hlsParams, // Parámetros específicos de HLS
+        outputFile, // Archivo de salida
+    ];
+};
+
+// Función para lanzar FFmpeg
+const startFFmpeg = (id, inputUrl) => {
 
     // Abrimos el fichero de logs
     const logFilePath = path.join(logsFolder, `${id}.log`);
@@ -34,15 +47,9 @@ const startFFmpeg = (id, inputUrl, outputFolder, additionalParams = []) => {
 
     console.log(`[FFmpeg - ${id}] Starting on URL: ${inputUrl}`);
 
-    // Creamos la línea de argumentos
-    const ffmpegArgs = [
-        '-i', inputUrl,
-        ...additionalParams,
-        '-f', 'hls',
-        path.join(outputFolder, `${id}/output.m3u8`),
-    ];
-
-    //Ejecutamos el comando (ffmpeg <args>)
+    // Obtenemos un string con los parámetros
+    const ffmpegArgs = buildFfmpegParams(id, inputUrl);
+    // Ejecutamos el comando (ffmpeg <args>)
     const process = spawn('ffmpeg', ffmpegArgs);
 
     // Guardar el proceso en el mapa
@@ -59,10 +66,7 @@ const startFFmpeg = (id, inputUrl, outputFolder, additionalParams = []) => {
     return process;
 };
 
-/**
- * Detiene el proceso FFmpeg de un flujo específico.
- * @param {string} id - ID único del flujo.
- */
+// Función para detener FFmpeg
 const stopFFmpeg = (id) => {
     if (ffmpegProcesses[id]) {
         console.log(`[FFmpeg - ${id}] Stopping...`);
