@@ -5,7 +5,6 @@ const fs = require('fs');
 const config = require('../config/default');
 //Script para la ejecución de FFmpeg
 const { startFFmpeg } = require('./controllers/ffmpegRunner');
-const { log } = require('console');
 
 const app = express();
 
