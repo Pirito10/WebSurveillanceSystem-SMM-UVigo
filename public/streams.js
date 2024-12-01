@@ -1,12 +1,13 @@
-// IDs de los flujos
-const streams = ['stream1'];
+// Lista de flujos
+const streams = ['stream1', 'stream2', 'stream3', 'stream4'];
+// Contenedor (CSS Grid)
 const videosContainer = document.getElementById('videos');
 
 // Ajustar el diseño del grid dinámicamente
 const adjustGrid = () => {
     const streamCount = streams.length;
 
-    // Determina las filas y columnas según el número de streams
+    // Determina las filas y columnas según el número de flujos
     let rows, cols;
 
     if (streamCount === 1) {
@@ -32,27 +33,35 @@ const adjustGrid = () => {
         cols = 3;
     }
 
-    // Actualiza las propiedades del contenedor grid
+    // Actualiza las propiedades del contenedor
     videosContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
     videosContainer.style.gridTemplateRows = `repeat(${rows}, auto)`;
 };
 
-// Añadir los videos
+// Recorremos la lista de flujos
 streams.forEach(streamId => {
+    // Creamos un contenedor para cada flujo
     const videoWrapper = document.createElement('div');
+    // Creamos su elemento 'video'
     const video = document.createElement('video');
     video.controls = true;
     video.autoplay = true;
 
+    // Obtenemos la fuente del flujo
     const videoSrc = `/hls/${streamId}/output.m3u8`;
+
+    // Comprobamos si el navegador soporta HLS.js
     if (Hls.isSupported()) {
+        // Cargamos el flujo de vídeo y lo conectamos al reproductor
         const hls = new Hls();
         hls.loadSource(videoSrc);
         hls.attachMedia(video);
+        // Comprobamos si el navegador tiene soporte nativo para HLS (Safari)
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = videoSrc;
     }
 
+    // Añadimos el vídeo a su contenedor, y el contenedor al grid
     videoWrapper.appendChild(video);
     videosContainer.appendChild(videoWrapper);
 });
