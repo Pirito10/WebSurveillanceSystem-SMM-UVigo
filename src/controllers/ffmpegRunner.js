@@ -1,7 +1,7 @@
-const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const config = require('../../config/default');
+const ffmpeg = require('fluent-ffmpeg');
 
 // Mapa para almacenar procesos de FFmpeg por su ID
 const ffmpegProcesses = {};
@@ -10,8 +10,8 @@ const ffmpegProcesses = {};
 const logsFolder = path.resolve(config.paths.logsFolder);
 const outputFolder = path.resolve(config.paths.outputFolder);
 
-// Función para construír el parámetro de ejecución de FFmpeg
-const buildFfmpegParams = (id, inputUrl) => {
+// Función para lanzar FFmpeg
+const startFFmpeg = (id, inputUrl) => {
 
     // Crear subdirectorio para el ID si no existe
     const streamOutputFolder = path.join(outputFolder, id);
@@ -20,20 +20,8 @@ const buildFfmpegParams = (id, inputUrl) => {
         console.log(`[FFmpeg - ${id}] Directory created: ${streamOutputFolder}`);
     }
 
-    // Obtenemos las configuraciones y la ruta al fichero de salida
-    const ffmpegConfig = config.ffmpeg;
-    const outputFile = path.join(streamOutputFolder, 'output.m3u8'); // Archivo de salida HLS
-
-    return [
-        '-i', inputUrl, // URL de entrada
-        ...ffmpegConfig.baseParams, // Parámetros básicos
-        ...ffmpegConfig.hlsParams, // Parámetros específicos de HLS
-        outputFile, // Archivo de salida
-    ];
-};
-
-// Función para lanzar FFmpeg
-const startFFmpeg = (id, inputUrl) => {
+    // Archivo de salida HLS
+    const outputFile = path.join(streamOutputFolder, 'output.m3u8');
 
     // Abrimos el fichero de logs
     const logFilePath = path.join(logsFolder, `${id}.log`);
@@ -43,30 +31,38 @@ const startFFmpeg = (id, inputUrl) => {
     if (ffmpegProcesses[id]) {
         console.log(`[FFmpeg - ${id}] Was already running. Stopping...`);
         ffmpegProcesses[id].kill('SIGINT'); // Detener proceso anterior
+        delete ffmpegProcesses[id];// Eliminar el proceso del mapa
     }
 
-    console.log(`[FFmpeg - ${id}] Starting on URL: ${inputUrl}`);
+    // Crear el comando ffmpeg
+    const process = ffmpeg(inputUrl)
+        .outputOptions([
+            ...config.ffmpeg.baseParams, // Parámetros básicos
+            ...config.ffmpeg.hlsParams, // Parámetros específicos de HLS
+        ])
+        .output(outputFile) // Archivo de salida
+        .on('start', () => {
+            console.log(`[FFmpeg - ${id}] Starting on URL: ${inputUrl}`);
+        })
+        .on('stderr', (stderrLine) => {
+            logStream.write(`${stderrLine}\n`);
+        })
+        .on('error', (err) => {
+            console.log(`[FFmpeg - ${id}] Error: ${err}`);
+            delete ffmpegProcesses[id];
+        })
+        .on('end', () => {
+            delete ffmpegProcesses[id];
+        });
 
-    // Obtenemos un string con los parámetros
-    const ffmpegArgs = buildFfmpegParams(id, inputUrl);
-    // Ejecutamos el comando (ffmpeg <args>)
-    const process = spawn('ffmpeg', ffmpegArgs);
+    // Iniciar el proceso
+    process.run();
 
     // Guardar el proceso en el mapa
     ffmpegProcesses[id] = process;
-
-    // Redirigir logs a archivo
-    process.stderr.on('data', (data) => logStream.write(`${data.toString()}\n`));
-
-    process.on('close', (code) => {
-        console.log(`[FFmpeg - ${id}] Finished with code: ${code}`);
-        delete ffmpegProcesses[id]; // Limpia la referencia
-    });
-
-    return process;
 };
 
-// Función para detener FFmpeg
+// Función para detener un proceso FFmpeg
 const stopFFmpeg = (id) => {
     if (ffmpegProcesses[id]) {
         console.log(`[FFmpeg - ${id}] Stopping...`);
