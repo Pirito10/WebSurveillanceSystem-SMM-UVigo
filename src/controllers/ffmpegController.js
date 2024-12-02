@@ -1,7 +1,8 @@
 const path = require('path');
 const fs = require('fs');
-const config = require('../../config/default');
 const ffmpeg = require('fluent-ffmpeg');
+const config = require('../../config/default'); // Fichero de configuración
+const createDirectory = require('../utils/utils'); // Fichero de útiles
 
 // Mapa para almacenar procesos de FFmpeg por su ID
 const ffmpegProcesses = {};
@@ -15,10 +16,7 @@ const startFFmpeg = (id, inputUrl) => {
 
     // Crear subdirectorio para el ID si no existe
     const streamOutputFolder = path.join(outputFolder, id);
-    if (!fs.existsSync(streamOutputFolder)) {
-        fs.mkdirSync(streamOutputFolder, { recursive: true });
-        console.log(`[FFmpeg - ${id}] Directory created: ${streamOutputFolder}`);
-    }
+    createDirectory(streamOutputFolder, `FFmpeg - ${id}`);
 
     // Archivo de salida HLS
     const outputFile = path.join(streamOutputFolder, 'output.m3u8');
@@ -73,7 +71,4 @@ const stopFFmpeg = (id) => {
     }
 };
 
-module.exports = {
-    startFFmpeg,
-    stopFFmpeg,
-};
+module.exports = startFFmpeg;
