@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
-const { startFFmpeg } = require('../controllers/ffmpegRunner');
+const { startFFmpeg } = require('../controllers/ffmpegController');
 const config = require('../../config/default');
 
 const router = express.Router();
