@@ -6,6 +6,7 @@ module.exports = {
     paths: {
         outputFolder: './output', // Carpeta base para los archivos HLS
         logsFolder: './logs', // Carpeta para los logs de FFmpeg
+        dataFolder: './data', // Carpeta para la base de datos
     },
     ffmpeg: {
         baseParams: [

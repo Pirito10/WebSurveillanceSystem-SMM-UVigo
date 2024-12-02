@@ -7,7 +7,7 @@ const router = express.Router();
 const baseOutputFolder = path.resolve(config.paths.outputFolder);
 
 // Servimos los archivos HLS de cada flujo dinámicamente
-router.use('/hls/:id', (req, res, next) => {
+router.use('/hls/:id', (req, res) => {
     // Obtenemos el path del flujo
     const streamId = req.params.id;
     const streamPath = path.join(baseOutputFolder, streamId);
