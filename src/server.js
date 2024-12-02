@@ -1,10 +1,10 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-//Fichero con configuraciones varias
+// Fichero de configuración
 const config = require('../config/default');
-//Script para la ejecución de FFmpeg
-const { startFFmpeg } = require('./controllers/ffmpegRunner');
+// Fichero de rutas
+const routes = require('./routes/routes');
 
 const app = express();
 app.use(express.json());
@@ -25,33 +25,8 @@ if (!fs.existsSync(logsFolder)) {
 const staticFolder = path.resolve(config.server.staticFolder);
 app.use(express.static(staticFolder));
 
-// Servir los archivos HLS de cada flujo dinámicamente
-app.use('/hls/:id', (req, res, next) => {
-    const streamId = req.params.id;
-    const streamPath = path.join(baseOutputFolder, streamId);
-    if (fs.existsSync(streamPath)) {
-        express.static(streamPath)(req, res, next); // Sirve los archivos desde el subdirectorio correspondiente
-    } else {
-        res.status(404).send('Stream not found');
-    }
-});
-
-// Endpoint para iniciar FFmpeg
-app.post('/api/start-ffmpeg', (req, res) => {
-    const { id, url } = req.body;
-
-    if (!id || !url) {
-        return res.status(400).send('Faltan parámetros (id o url).');
-    }
-
-    try {
-        startFFmpeg(id, url);
-        res.status(200).send('FFmpeg iniciado correctamente.');
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Error al iniciar FFmpeg.');
-    }
-});
+// Usamos las rutas definidas en routes.js
+app.use(routes);
 
 // Iniciar el servidor
 const port = config.server.port;
