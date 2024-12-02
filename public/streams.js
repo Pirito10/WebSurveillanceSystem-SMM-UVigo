@@ -1,54 +1,34 @@
 // Lista de flujos
-const streams = ['stream1', 'stream2', 'stream3', 'stream4'];
-// Contenedor (CSS Grid)
+let streams = JSON.parse(localStorage.getItem('streams')) || [];
+// Contenedor de flujos (CSS Grid)
 const videosContainer = document.getElementById('videos');
 
 // Ajustar el diseño del grid dinámicamente
 const adjustGrid = () => {
     const streamCount = streams.length;
-
-    // Determina las filas y columnas según el número de flujos
-    let rows, cols;
-
+    // Para un flujo, ocupamos toda la columna
     if (streamCount === 1) {
-        rows = 1;
-        cols = 1;
+        videosContainer.style.gridTemplateColumns = '1fr';
+        // Para dos flujos, uno por cada columna
     } else if (streamCount === 2) {
-        rows = 1;
-        cols = 2;
-    } else if (streamCount === 3) {
-        rows = 2;
-        cols = 2;
-    } else if (streamCount === 4) {
-        rows = 2;
-        cols = 2;
-    } else if (streamCount <= 6) {
-        rows = 3;
-        cols = 2;
-    } else if (streamCount <= 9) {
-        rows = 3;
-        cols = 3;
+        videosContainer.style.gridTemplateColumns = '1fr 1fr';
+        // Para tres o cuatro flujos, mantenemos dos columnas
+    } else if (streamCount <= 4) {
+        videosContainer.style.gridTemplateColumns = '1fr 1fr';
+        // Para más, ajustamos dinámicamente
     } else {
-        rows = Math.ceil(streamCount / 3); // A partir de 10, mantén 3 columnas
-        cols = 3;
+        videosContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
     }
-
-    // Actualiza las propiedades del contenedor
-    videosContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-    videosContainer.style.gridTemplateRows = `repeat(${rows}, auto)`;
 };
 
-// Recorremos la lista de flujos
-streams.forEach(streamId => {
+// Función para añadir un nuevo flujo
+const addStream = (streamId, videoSrc) => {
     // Creamos un contenedor para cada flujo
     const videoWrapper = document.createElement('div');
     // Creamos su elemento 'video'
     const video = document.createElement('video');
     video.controls = true;
     video.autoplay = true;
-
-    // Obtenemos la fuente del flujo
-    const videoSrc = `/hls/${streamId}/output.m3u8`;
 
     // Comprobamos si el navegador soporta HLS.js
     if (Hls.isSupported()) {
@@ -64,7 +44,59 @@ streams.forEach(streamId => {
     // Añadimos el vídeo a su contenedor, y el contenedor al grid
     videoWrapper.appendChild(video);
     videosContainer.appendChild(videoWrapper);
+
+    // Reajustamos el grid
+    adjustGrid();
+};
+
+// Listener para el botón de añadir flujo
+document.getElementById('addStreamButton').addEventListener('click', async () => {
+    // Leemos la URL del campo de texto
+    const inputField = document.getElementById('streamUrl');
+    const streamUrl = inputField.value.trim();
+
+    if (!streamUrl) {
+        alert('Por favor, introduce una URL válida.');
+        return;
+    }
+
+    // Generaramos un nuevo ID para el flujo
+    const streamId = `stream${streams.length + 1}`;
+    streams.push(streamId);
+
+    // Guardamos el flujo en el almacenamiento local
+    localStorage.setItem('streams', JSON.stringify(streams));
+
+    // Obtenemos la fuente del flujo y la añadimos
+    const videoSrc = `/hls/${streamId}/output.m3u8`;
+    addStream(streamId, videoSrc);
+
+    // Llamamos al comando FFmpeg en el servidor
+    try {
+        const response = await fetch('/api/start-ffmpeg', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: streamId, url: streamUrl }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error al iniciar FFmpeg: ${await response.text()}`);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Error al iniciar el flujo en el servidor.');
+    }
+
+    // Limpiamos el campo de texto
+    inputField.value = '';
 });
 
-// Ajustar el grid después de añadir los videos
-adjustGrid();
+// Al cargar la página, renderizamos los flujos almacenados en el almacenamiento local
+window.onload = () => {
+    streams.forEach(streamId => {
+        const videoSrc = `/hls/${streamId}/output.m3u8`;
+        addStream(streamId, videoSrc);
+    });
+};

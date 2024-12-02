@@ -7,6 +7,7 @@ const config = require('../config/default');
 const { startFFmpeg } = require('./controllers/ffmpegRunner');
 
 const app = express();
+app.use(express.json());
 
 // Crear los directorios necesarios
 const baseOutputFolder = path.resolve(config.paths.outputFolder); //Directorio output (para los flujos de vídeo)
@@ -35,9 +36,22 @@ app.use('/hls/:id', (req, res, next) => {
     }
 });
 
-// Iniciar dos flujos al arrancar el servidor
-startFFmpeg('stream1', 'http://192.168.0.7:8080/video');
-startFFmpeg('stream2', 'http://192.168.0.8:8080/video');
+// Endpoint para iniciar FFmpeg
+app.post('/api/start-ffmpeg', (req, res) => {
+    const { id, url } = req.body;
+
+    if (!id || !url) {
+        return res.status(400).send('Faltan parámetros (id o url).');
+    }
+
+    try {
+        startFFmpeg(id, url);
+        res.status(200).send('FFmpeg iniciado correctamente.');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al iniciar FFmpeg.');
+    }
+});
 
 // Iniciar el servidor
 const port = config.server.port;
