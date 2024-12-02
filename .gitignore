@@ -131,4 +131,7 @@ dist
 .pnp.*
 
 # video files
-output
+output/
+
+# database files
+data/
