@@ -69,8 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Redirigimos a la pantalla de flujos
                 window.location.href = '/streams';
             } else {
-                const errorMessage = await response.text();
-                showErrorMessage(loginButton, `Error: ${errorMessage}`);
+                // Obtenemos y mostramos el mensaje de error
+                const errorResponse = await response.json();
+                const errorMessage = errorResponse.error;
+                showErrorMessage(loginButton, errorMessage);
             }
         } catch (error) {
             console.error('Error:', error);
@@ -137,12 +139,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Redirigimos a la pantalla de flujos
                 window.location.href = '/streams';
             } else {
-                const errorMessage = await response.text();
-                showErrorMessage(loginButton, `Error: ${errorMessage}`);
+                // Obtenemos y mostramos el mensaje de error
+                const errorResponse = await response.json();
+                const errorMessage = errorResponse.error;
+                showErrorMessage(registerButton, errorMessage);
             }
         } catch (error) {
             console.error('Error:', error);
-            showErrorMessage(loginButton, 'There was a problem while trying to sign up');
+            showErrorMessage(registerButton, 'There was a problem while trying to sign up');
         }
     });
 });
