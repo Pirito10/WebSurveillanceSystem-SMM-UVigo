@@ -7,33 +7,55 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
 
-    // Mostrar solo el formulario de inicio de sesión al cargar
+    // Mostramos solo el formulario de inicio de sesión al cargar
     loginForm.style.display = 'block';
     registerForm.style.display = 'none';
 
-    // Alternar entre login y registro
+    // Cambio de login a registro
     document.getElementById('switchToRegister').addEventListener('click', () => {
         loginForm.style.display = 'none';
         registerForm.style.display = 'block';
     });
 
+    // Cambio de registro a login
     document.getElementById('switchToLogin').addEventListener('click', () => {
         loginForm.style.display = 'block';
         registerForm.style.display = 'none';
     });
 
-    // Manejar inicio de sesión
+    // Manejo de inicio de sesión
     loginButton.addEventListener('click', async (e) => {
+        // Prevenimos el comportamiento por defecto
         e.preventDefault();
 
-        const username = document.getElementById('loginUsername').value.trim();
-        const password = document.getElementById('loginPassword').value.trim();
+        // Obtenemos los campos de entrada
+        const usernameField = document.getElementById('loginUsername');
+        const passwordField = document.getElementById('loginPassword');
+        const username = usernameField.value.trim();
+        const password = passwordField.value.trim();
 
-        if (!username || !password) {
-            alert('Por favor, completa todos los campos.');
-            return;
+        // Limpia mensajes de error previos
+        clearErrorMessages();
+
+        // Variable para controlar si lo introducido es correcto
+        let hasError = false;
+
+        // Validamos el campo usuario
+        if (!username) {
+            showErrorMessage(usernameField, 'Username is mandatory');
+            hasError = true;
         }
 
+        // Validamos el campo contraseña
+        if (!password) {
+            showErrorMessage(passwordField, 'Password is mandatory');
+            hasError = true;
+        }
+
+        // Si hay errores no continuamos
+        if (hasError) return;
+
+        // Hacemos la solicitud a la base de datos
         try {
             const response = await fetch('/api/login', {
                 method: 'POST',
@@ -44,36 +66,64 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
-                // Redirigir a la página de flujos
+                // Redirigimos a la pantalla de flujos
                 window.location.href = '/streams';
             } else {
                 const errorMessage = await response.text();
-                alert(`Error al iniciar sesión: ${errorMessage}`);
+                showErrorMessage(loginButton, `Error: ${errorMessage}`);
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Hubo un problema al iniciar sesión.');
+            showErrorMessage(loginButton, 'There was a problem while trying to log in');
         }
     });
 
-    // Manejar registro
+    // Manejo de registro
     registerButton.addEventListener('click', async (e) => {
+        // Prevenimos el comportamiento por defecto
         e.preventDefault();
 
-        const username = document.getElementById('registerUsername').value.trim();
-        const password = document.getElementById('registerPassword').value.trim();
-        const confirmPassword = document.getElementById('confirmPassword').value.trim();
+        // Obtenemos los campos de entrada
+        const usernameField = document.getElementById('registerUsername');
+        const passwordField = document.getElementById('registerPassword');
+        const confirmPasswordField = document.getElementById('confirmPassword');
+        const username = usernameField.value.trim();
+        const password = passwordField.value.trim();
+        const confirmPassword = confirmPasswordField.value.trim();
 
-        if (!username || !password || !confirmPassword) {
-            alert('Por favor, completa todos los campos.');
-            return;
+        // Limpia mensajes de error previos
+        clearErrorMessages();
+
+        // Variable para controlar si lo introducido es correcto
+        let hasError = false;
+
+        // Validamos el campo usuario
+        if (!username) {
+            showErrorMessage(usernameField, 'Username is mandatory');
+            hasError = true;
+        }
+
+        // Validamos el campo contraseña
+        if (!password) {
+            showErrorMessage(passwordField, 'Password is mandatory');
+            hasError = true;
+        }
+
+        // Validamos el campo confirmar contraseña
+        if (!confirmPassword) {
+            showErrorMessage(confirmPasswordField, 'You must confirm the password');
+            hasError = true;
         }
 
         if (password !== confirmPassword) {
-            alert('Las contraseñas no coinciden.');
-            return;
+            showErrorMessage(confirmPasswordField, 'Passwords do not match');
+            hasError = true;
         }
 
+        // Si hay errores no continuamos
+        if (hasError) return;
+
+        // Hacemos la solicitud a la base de datos
         try {
             const response = await fetch('/api/register', {
                 method: 'POST',
@@ -84,17 +134,38 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
-                alert('Registro exitoso. Ahora puedes iniciar sesión.');
-                // Cambiar al formulario de login
-                loginForm.style.display = 'block';
-                registerForm.style.display = 'none';
+                // Redirigimos a la pantalla de flujos
+                window.location.href = '/streams';
             } else {
                 const errorMessage = await response.text();
-                alert(`Error al registrarse: ${errorMessage}`);
+                showErrorMessage(loginButton, `Error: ${errorMessage}`);
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Hubo un problema al registrarse.');
+            showErrorMessage(loginButton, 'There was a problem while trying to sign up');
         }
     });
 });
+
+// Función para mostrar un mensaje de error bajo un elemento
+function showErrorMessage(inputElement, message) {
+    // Verificamos si ya existe un mensaje de error debajo del elemento
+    if (inputElement.nextSibling && inputElement.nextSibling.className === 'error-message') {
+        // Actualizamos el mensaje si ya existe
+        inputElement.nextSibling.textContent = message;
+        return;
+    }
+
+    // Creamos un nuevo mensaje de error si no existe
+    const error = document.createElement('small');
+    error.className = 'error-message';
+    error.textContent = message;
+    // Colocamos el mensaje después del elemento
+    inputElement.parentNode.insertBefore(error, inputElement.nextSibling);
+}
+
+// Función para limpiar todos los mensajes de error
+function clearErrorMessages() {
+    const errorMessages = document.querySelectorAll('.error-message');
+    errorMessages.forEach((message) => message.remove());
+}
