@@ -1,12 +1,18 @@
+const path = require('path');
+
 module.exports = {
     server: {
         port: 3000, // Puerto en el que se ejecuta el servidor
-        staticFolder: './public', // Carpeta para los archivos estáticos
+        staticFolder: path.resolve(__dirname, '../public'), // Ruta a la carpeta con los archivos estáticos
     },
     paths: {
-        outputFolder: './output', // Carpeta base para los archivos HLS
-        logsFolder: './logs', // Carpeta para los logs de FFmpeg
-        dataFolder: './data', // Carpeta para la base de datos
+        outputFolder: path.resolve(__dirname, '../output'), // Ruta a la carpeta para los archivos HLS
+        logsFolder: path.resolve(__dirname, '../logs'), // Ruta a la carpeta para los logs de FFmpeg
+        dataFolder: path.resolve(__dirname, '../data'), // Ruta a la carpeta para la base de datos
+        htmlFiles: {
+            login: path.resolve(__dirname, '../public/login.html'), // Ruta al fichero HTML de login
+            streams: path.resolve(__dirname, '../public/streams.html'), // Ruta al fichero HTML de flujos
+        },
     },
     ffmpeg: {
         baseParams: [
