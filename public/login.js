@@ -66,6 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
+                // Obtenemos el ID del usuario de la respuesta
+                const userID = await response.text();
+                // Lo guardamos en el almacenamiento de la sesión
+                sessionStorage.setItem('userID', userID);
                 // Redirigimos a la pantalla de flujos
                 window.location.href = '/streams';
             } else {
@@ -135,6 +139,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
+                // Obtenemos el ID del usuario de la respuesta
+                const userID = await response.text();
+                // Lo guardamos en el almacenamiento de la sesión
+                sessionStorage.setItem('userID', userID);
                 // Redirigimos a la pantalla de flujos
                 window.location.href = '/streams';
             } else {
