@@ -26,7 +26,7 @@ router.post('/api/login', (req, res) => {
 
     // Comprobamos que se hayan cubiertos ambos campos
     if (!username || !password) {
-        return res.status(400).json({ error: 'Missing mandatory fields' });
+        return res.status(400).send('Missing mandatory fields');
     }
 
     try {
@@ -37,11 +37,11 @@ router.post('/api/login', (req, res) => {
         if (user) {
             res.status(200);
         } else {
-            res.status(401).json({ error: 'Wrong user or password' });
+            res.status(401).send('Wrong user or password');
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal error' });
+        res.status(500).send('Internal error');
     }
 });
 
@@ -52,7 +52,7 @@ router.post('/api/register', (req, res) => {
 
     // Comprobamos que se hayan cubiertos ambos campos
     if (!username || !password) {
-        return res.status(400).json({ error: 'Missing mandatory fields' });
+        return res.status(400).send('Missing mandatory fields');
     }
 
     try {
@@ -61,7 +61,7 @@ router.post('/api/register', (req, res) => {
 
         // Comprobamos si el usuario ya existe
         if (user) {
-            return res.status(409).json({ error: 'User already exists' });
+            return res.status(409).send('User already exists');
         }
 
         // Hacemos una consulta a la base de datos para crear el nuevo usuario
@@ -69,18 +69,18 @@ router.post('/api/register', (req, res) => {
         res.status(201);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal error' });
+        res.status(500).send('Internal error');
     }
 });
 
-// Servimos los archivos HLS de cada flujo dinámicamente
+// Endpoint para servir los archivos HLS de cada flujo dinámicamente
 router.use('/hls/:id', (req, res) => {
-    // Obtenemos el path del flujo
-    const streamId = req.params.id;
-    const streamPath = path.join(outputFolder, streamId);
+    // Obtenemos la ruta al flujo
+    const streamPath = path.join(outputFolder, req.params.id);
 
-    // Comprobamos si existe el flujo
+    // Servirmos los ficheros
     express.static(streamPath)(req, res, (err) => {
+        // Comprobamos que existe el flujo
         if (err) {
             res.status(404).send('Stream not found');
         }
@@ -89,21 +89,16 @@ router.use('/hls/:id', (req, res) => {
 
 // Endpoint para iniciar FFmpeg
 router.post('/api/start-ffmpeg', (req, res) => {
-    // Obtenemos la ID y la URL
+    // Obtenemos el ID y la URL de la solicitud
     const { id, url } = req.body;
 
-    // Comprobamos si los parámetros son correctos
-    if (!id || !url) {
-        return res.status(400).send('Faltan parámetros (id o url).');
-    }
-
+    // Intentamos ejecutar el comando FFmpeg correspondiente
     try {
-        // Ejecutamos el comando FFmpeg
         startFFmpeg(id, url);
-        res.status(200).send('FFmpeg iniciado correctamente.');
+        res.status(200);
     } catch (error) {
         console.error(error);
-        res.status(500).send('Error al iniciar FFmpeg.');
+        res.status(500).send('Internal error');
     }
 });
 

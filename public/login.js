@@ -70,8 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = '/streams';
             } else {
                 // Obtenemos y mostramos el mensaje de error
-                const errorResponse = await response.json();
-                const errorMessage = errorResponse.error;
+                const errorMessage = await response.text();
                 showErrorMessage(loginButton, errorMessage);
             }
         } catch (error) {
@@ -140,8 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = '/streams';
             } else {
                 // Obtenemos y mostramos el mensaje de error
-                const errorResponse = await response.json();
-                const errorMessage = errorResponse.error;
+                const errorMessage = await response.text();
                 showErrorMessage(registerButton, errorMessage);
             }
         } catch (error) {
