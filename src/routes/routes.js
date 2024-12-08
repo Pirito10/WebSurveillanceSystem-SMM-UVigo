@@ -73,6 +73,30 @@ router.post('/api/register', (req, res) => {
     }
 });
 
+// Endpoint para añadir un flujo a la base de datos
+router.post('/api/streams', (req, res) => {
+    // Obtenemos el usuario y la URL de la solicitud
+    const { userId, url } = req.body;
+
+    try {
+        // Insertamos el flujo en la base de datos
+        const result = db.prepare('INSERT INTO streams (user_id, url) VALUES (?, ?)').run(userId, url);
+        // Obtenemos el ID generado
+        const streamId = result.lastInsertRowid;
+
+        // Generamos el nombre del flujo basado en el ID
+        const name = `stream${streamId}`;
+
+        // Actualizamos la entrada de la base de datos con el nombre del flujo
+        db.prepare('UPDATE streams SET name = ? WHERE id = ?').run(name, streamId);
+        res.status(201);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal error');
+    }
+});
+
+
 // Endpoint para servir los archivos HLS de cada flujo dinámicamente
 router.use('/hls/:id', (req, res) => {
     // Obtenemos la ruta al flujo
