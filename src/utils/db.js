@@ -43,3 +43,5 @@ try {
 } catch (err) {
     console.error(`[DB] Error while creating 'streams' table: ${err.message}`);
 }
+
+module.exports = db;
