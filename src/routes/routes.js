@@ -35,7 +35,8 @@ router.post('/api/login', (req, res) => {
 
         // Comprobamos si el usuario existe
         if (user) {
-            res.status(200);
+            // Enviamos el ID del usuario en la respuesta
+            res.status(200).send(`${user.id}`);
         } else {
             res.status(401).send('Wrong user or password');
         }
@@ -64,9 +65,12 @@ router.post('/api/register', (req, res) => {
             return res.status(409).send('User already exists');
         }
 
-        // Hacemos una consulta a la base de datos para crear el nuevo usuario
-        db.prepare('INSERT INTO users (username, password) VALUES (?, ?)').run(username, password);
-        res.status(201);
+        // Insertamos el nuevo usuario a la base de datos
+        const result = db.prepare('INSERT INTO users (username, password) VALUES (?, ?)').run(username, password);
+        // Obtenemos el ID del usuario
+        const userID = result.lastInsertRowid;
+
+        res.status(201).send(`${userID}`);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal error');
@@ -76,20 +80,37 @@ router.post('/api/register', (req, res) => {
 // Endpoint para añadir un flujo a la base de datos
 router.post('/api/streams', (req, res) => {
     // Obtenemos el usuario y la URL de la solicitud
-    const { userId, url } = req.body;
+    const userID = req.body.userID;
+    const streamUrl = req.body.streamUrl;
 
     try {
         // Insertamos el flujo en la base de datos
-        const result = db.prepare('INSERT INTO streams (user_id, url) VALUES (?, ?)').run(userId, url);
+        const result = db.prepare('INSERT INTO streams (user_id, url) VALUES (?, ?)').run(userID, streamUrl);
         // Obtenemos el ID generado
-        const streamId = result.lastInsertRowid;
+        const streamID = result.lastInsertRowid;
 
         // Generamos el nombre del flujo basado en el ID
-        const name = `stream${streamId}`;
+        const streamName = `stream${streamID}`;
 
         // Actualizamos la entrada de la base de datos con el nombre del flujo
-        db.prepare('UPDATE streams SET name = ? WHERE id = ?').run(name, streamId);
-        res.status(201);
+        db.prepare('UPDATE streams SET name = ? WHERE id = ?').run(streamName, streamID);
+        res.status(201).send(`${streamName}`);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal error');
+    }
+});
+
+// Endpoint para devolver los flujos de un usuario
+router.get('/api/streams/:userID', (req, res) => {
+    // Obtenemos el usuario de la solicitud
+    const userID = req.params.userID;
+
+    try {
+        // Hacemos una consulta a la base de datos para obtener los flujos del usuario
+        const streams = db.prepare('SELECT id, name, url FROM streams WHERE user_id = ?').all(userID);
+        // Devolvemos la lista de flujos en la respuesta
+        res.status(200).json(streams);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal error');
