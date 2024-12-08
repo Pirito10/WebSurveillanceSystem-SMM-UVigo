@@ -1,11 +1,9 @@
-// Lista de flujos
-let streams = JSON.parse(localStorage.getItem('streams')) || [];
 // Contenedor de flujos (CSS Grid)
 const videosContainer = document.getElementById('videos');
 
 // Ajustar el diseño del grid dinámicamente
 const adjustGrid = () => {
-    const streamCount = streams.length;
+    const streamCount = videosContainer.childElementCount;
     // Para un flujo, ocupamos toda la columna
     if (streamCount === 1) {
         videosContainer.style.gridTemplateColumns = '1fr';
@@ -22,7 +20,7 @@ const adjustGrid = () => {
 };
 
 // Función para añadir un nuevo flujo
-const addStream = (streamId, videoSrc) => {
+const addStream = (videoSrc) => {
     // Creamos un contenedor para cada flujo
     const videoWrapper = document.createElement('div');
     // Creamos su elemento 'video'
@@ -56,47 +54,93 @@ document.getElementById('addStreamButton').addEventListener('click', async () =>
     const streamUrl = inputField.value.trim();
 
     if (!streamUrl) {
-        alert('Por favor, introduce una URL válida.');
+        alert('Please, introduce an URL');
         return;
     }
 
-    // Generaramos un nuevo ID para el flujo
-    const streamId = `stream${streams.length + 1}`;
-    streams.push(streamId);
+    // Obtenemos el ID del usuario del almacenamiento de la sesión
+    const userID = sessionStorage.getItem('userID');
 
-    // Guardamos el flujo en el almacenamiento local
-    localStorage.setItem('streams', JSON.stringify(streams));
+    // Si no existe, redirigimos a la pantalla de inicio de sesión
+    if (!userID) {
+        window.location.href = '/';
+        return;
+    }
 
-    // Obtenemos la fuente del flujo y la añadimos
-    const videoSrc = `/hls/${streamId}/output.m3u8`;
-    addStream(streamId, videoSrc);
-
-    // Llamamos al comando FFmpeg en el servidor
     try {
-        const response = await fetch('/api/start-ffmpeg', {
+        // Guardamos el flujo en la base de datos
+        const response = await fetch('/api/streams', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ id: streamId, url: streamUrl }),
+            body: JSON.stringify({ userID, streamUrl }),
         });
 
-        if (!response.ok) {
-            throw new Error(`Error al iniciar FFmpeg: ${await response.text()}`);
+        if (response.ok) {
+            // Obtenemos el nombre del flujo de la respuesta
+            const streamName = await response.text();
+
+            // Obtenemos la fuente del flujo y la añadimos
+            const videoSrc = `/hls/${streamName}/output.m3u8`;
+            addStream(videoSrc);
+
+            // Llamamos al comando FFmpeg en el servidor
+            await fetch('/api/start-ffmpeg', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: streamName, url: streamUrl }),
+            });
+        } else {
+            console.error(await response.text());
         }
-    } catch (err) {
-        console.error(err);
-        alert('Error al iniciar el flujo en el servidor.');
+    } catch (error) {
+        console.error(error);
     }
 
     // Limpiamos el campo de texto
     inputField.value = '';
 });
 
-// Al cargar la página, renderizamos los flujos almacenados en el almacenamiento local
-window.onload = () => {
-    streams.forEach(streamId => {
-        const videoSrc = `/hls/${streamId}/output.m3u8`;
-        addStream(streamId, videoSrc);
-    });
+// Función para cargar los flujos del usuario desde el servidor
+window.onload = async () => {
+    // Obtenemos el ID del usuario del almacenamiento de la sesión
+    const userID = sessionStorage.getItem('userID');
+
+    // Si no existe, redirigimos a la pantalla de inicio de sesión
+    if (!userID) {
+        window.location.href = '/';
+        return;
+    }
+
+    try {
+        // Hacemos una solicitud para obtener los flujos del usuario
+        const response = await fetch(`/api/streams/${userID}`);
+
+        if (response.ok) {
+            // Obtenemos la lista de flujos de la respuesta
+            const streams = await response.json();
+
+            streams.forEach(async (stream) => {
+                // Añadimos el reproductor para cada flujo
+                const videoSrc = `/hls/${stream.name}/output.m3u8`;
+                addStream(videoSrc);
+
+                // Llamamos al correspondiente comando FFmpeg en el servidor
+                await fetch('/api/start-ffmpeg', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: stream.name, url: stream.url }),
+                });
+            });
+        } else {
+            console.error(await response.text());
+        }
+    } catch (error) {
+        console.error(error);
+    }
 };
