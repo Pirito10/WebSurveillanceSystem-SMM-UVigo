@@ -33,9 +33,8 @@ try {
         CREATE TABLE IF NOT EXISTS streams (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
-            name TEXT NOT NULL,
+            name TEXT UNIQUE,
             url TEXT NOT NULL,
-            config TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
     `).run();
