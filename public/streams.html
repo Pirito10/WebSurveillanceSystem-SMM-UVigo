@@ -3,20 +3,22 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Multiple Streams</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMM</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 
 <body>
-    <h1>Streaming en Vivo (Múltiples Flujos)</h1>
+    <h1>Videosurveillance Web System</h1>
 
     <!-- Formulario para añadir nuevos flujos -->
     <div id="addStream">
-        <input type="text" id="streamUrl" placeholder="Introduce la URL del flujo">
-        <button id="addStreamButton">Añadir Flujo</button>
+        <input type="text" id="streamUrl" placeholder="Introduce stream URL">
+        <button id="addStreamButton">Add stream</button>
     </div>
 
+    <!-- Contenedor para los flujos -->
     <div id="videos"></div>
 
     <script src="streams.js"></script>
