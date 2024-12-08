@@ -91,7 +91,7 @@ document.getElementById('addStreamButton').addEventListener('click', async () =>
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ id: streamName, url: streamUrl }),
+                body: JSON.stringify({ streamName, streamUrl }),
             });
         } else {
             console.error(await response.text());
@@ -124,8 +124,12 @@ window.onload = async () => {
             const streams = await response.json();
 
             streams.forEach(async (stream) => {
+                // Obtenemos el nombre y URL del flujo
+                const streamName = stream.name;
+                const streamUrl = stream.url;
+
                 // Añadimos el reproductor para cada flujo
-                const videoSrc = `/hls/${stream.name}/output.m3u8`;
+                const videoSrc = `/hls/${streamName}/output.m3u8`;
                 addStream(videoSrc);
 
                 // Llamamos al correspondiente comando FFmpeg en el servidor
@@ -134,7 +138,7 @@ window.onload = async () => {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ id: stream.name, url: stream.url }),
+                    body: JSON.stringify({ streamName, streamUrl }),
                 });
             });
         } else {

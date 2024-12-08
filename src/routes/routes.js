@@ -22,7 +22,8 @@ router.get('/streams', (_req, res) => {
 // Endpoint para iniciar sesión
 router.post('/api/login', (req, res) => {
     // Obtenemos el usuario y contraseña de la solicitud
-    const { username, password } = req.body;
+    const username = req.body.username;
+    const password = req.body.password;
 
     // Comprobamos que se hayan cubiertos ambos campos
     if (!username || !password) {
@@ -49,7 +50,8 @@ router.post('/api/login', (req, res) => {
 // Endpoint para registrar un usuario
 router.post('/api/register', (req, res) => {
     // Obtenemos el usuario y contraseña de la solicitud
-    const { username, password } = req.body;
+    const username = req.body.username;
+    const password = req.body.password;
 
     // Comprobamos que se hayan cubiertos ambos campos
     if (!username || !password) {
@@ -135,11 +137,12 @@ router.use('/hls/:id', (req, res) => {
 // Endpoint para iniciar FFmpeg
 router.post('/api/start-ffmpeg', (req, res) => {
     // Obtenemos el ID y la URL de la solicitud
-    const { id, url } = req.body;
+    const streamName = req.body.streamName;
+    const streamUrl = req.body.streamUrl;
 
     // Intentamos ejecutar el comando FFmpeg correspondiente
     try {
-        startFFmpeg(id, url);
+        startFFmpeg(streamName, streamUrl);
         res.status(200);
     } catch (error) {
         console.error(error);
