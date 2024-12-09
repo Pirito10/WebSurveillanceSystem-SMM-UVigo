@@ -46,7 +46,7 @@ const startFFmpeg = (id, inputUrl) => {
             logStream.write(`${stderrLine}\n`);
         })
         .on('error', (err) => {
-            console.log(`[FFmpeg - ${id}] Error: ${err}`);
+            console.log(`[FFmpeg - ${id}] ${err}`);
             delete ffmpegProcesses[id];
         })
         .on('end', () => {
