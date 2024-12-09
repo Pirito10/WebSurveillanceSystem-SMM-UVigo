@@ -4,22 +4,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMM</title>
+    <title>Streams | SMM</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 
 <body>
-    <h1>Videosurveillance Web System</h1>
+    <!-- Encabezado -->
+    <header class="header">
+        <h1 class="header-title">Video Surveillance System</h1>
+        <button id="logoutButton">Log Out</button>
+    </header>
 
-    <!-- Formulario para añadir nuevos flujos -->
-    <div id="addStream">
-        <input type="text" id="streamUrl" placeholder="Introduce stream URL">
-        <button id="addStreamButton">Add stream</button>
-    </div>
+    <!-- Título -->
+    <main class="main-content">
+        <!-- Formulario para añadir nuevos flujos -->
+        <section class="add-stream">
+            <input type="text" id="streamUrl" placeholder="Enter stream URL">
+            <button id="addStreamButton">Add Stream</button>
+        </section>
 
-    <!-- Contenedor para los flujos -->
-    <div id="videos"></div>
+        <!-- Contenedor para los flujos -->
+        <section id="videos" class="videos-container"></section>
+    </main>
 
     <script src="streams.js"></script>
 </body>

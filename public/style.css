@@ -1,4 +1,4 @@
-/* General body styles */
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -7,14 +7,87 @@ body {
     overflow-x: hidden;
 }
 
-/* Title */
-h1 {
+/* Headers */
+.header {
+    position: relative;
+    padding: 10px 20px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     text-align: center;
-    margin-top: 20px;
 }
 
-/* Videos container */
-#videos {
+.header-title {
+    font-size: 36px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+#logoutButton {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 10px 16px;
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#logoutButton:hover {
+    background-color: #d9363e;
+}
+
+/* Titles */
+h1 {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 24px;
+    color: #333;
+}
+
+/* Main Content */
+.main-content {
+    padding: 20px;
+    text-align: center;
+}
+
+/* Add Stream Form */
+.add-stream {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.add-stream input,
+.add-stream button {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.add-stream input {
+    width: 300px;
+    margin-right: 10px;
+}
+
+.add-stream button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.add-stream button:hover {
+    background-color: #0056b3;
+}
+
+/* Videos Container */
+.videos-container {
     display: grid;
     gap: 20px;
     padding: 20px;
@@ -22,7 +95,6 @@ h1 {
     margin: 0 auto;
 }
 
-/* Video styles */
 video {
     width: 100%;
     height: auto;
@@ -30,34 +102,8 @@ video {
     border-radius: 8px;
 }
 
-/* Formulario para añadir flujos */
-#addStream {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-#addStream input {
-    padding: 8px;
-    width: 300px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-#addStream button {
-    padding: 8px 16px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#addStream button:hover {
-    background-color: #0056b3;
-}
-
-/* Login container styles */
-.login-container {
+/* Login and Register */
+.login-content {
     max-width: 400px;
     margin: 50px auto;
     padding: 20px;
@@ -68,22 +114,19 @@ video {
     text-align: center;
 }
 
-.login-container h1 {
-    font-size: 24px;
-    margin-bottom: 10px;
+.login-content h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
 }
 
-.login-container p {
+.login-content p {
     font-size: 14px;
-    margin-bottom: 20px;
+    margin: 10px 0;
     color: #666;
 }
 
-.login-container form {
-    margin-bottom: 20px;
-}
-
-.login-container input {
+.login-content input,
+.login-content button {
     display: block;
     width: calc(100% - 20px);
     padding: 10px;
@@ -93,41 +136,39 @@ video {
     font-size: 14px;
 }
 
-.login-container button {
-    width: 100%;
-    padding: 10px;
+.login-content button {
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 4px;
-    font-size: 16px;
     cursor: pointer;
+    font-size: 16px;
 }
 
-.login-container button:hover {
+.login-content button:hover {
     background-color: #0056b3;
 }
 
-.login-container hr {
-    display: none;
-}
-
-.login-container a {
+.login-content a {
     color: #6c63ff;
     text-decoration: none;
     font-size: 14px;
     cursor: pointer;
 }
 
-.login-container a:hover {
+.login-content a:hover {
     text-decoration: underline;
 }
 
-/* Mensajes de error */
+.login-content hr {
+    margin: 20px 0;
+    border: 0;
+    border-top: 1px solid #ccc;
+}
+
+/* Error Messages */
 .error-message {
     color: red;
     font-size: 12px;
-    margin-bottom: 10px;
-    margin-top: 10px;
+    margin-top: 5px;
     display: block;
 }
