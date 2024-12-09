@@ -1,7 +1,7 @@
 const path = require('path');
 const database = require('better-sqlite3');
 const config = require('../../config/default'); // Fichero de configuración
-const createDirectory = require('../utils/utils'); // Fichero de útiles
+const { createDirectory } = require('../utils/utils'); // Fichero de útiles
 
 // Creamos el directorio para almacenar la base de datos si no existe
 const dataFolder = path.resolve(config.paths.dataFolder);

@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const ffmpeg = require('fluent-ffmpeg');
 const config = require('../../config/default'); // Fichero de configuración
-const createDirectory = require('../utils/utils'); // Fichero de útiles
+const { createDirectory } = require('../utils/utils'); // Fichero de útiles
 
 // Mapa para almacenar procesos de FFmpeg por su ID
 const ffmpegProcesses = {};

@@ -2,8 +2,7 @@ const express = require('express');
 const path = require('path');
 const config = require('../config/default'); // Fichero de configuración
 const routes = require('./routes/routes'); // Fichero de rutas
-const createDirectory = require('./utils/utils'); // Fichero de útiles
-const db = require('./utils/db'); // Fichero de base de datos
+const { createDirectory } = require('./utils/utils'); // Fichero de útiles
 
 const app = express();
 app.use(express.json());
