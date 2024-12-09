@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const startFFmpeg = require('../controllers/ffmpegController');
 const db = require('../utils/db');
+const { hashPassword, verifyPassword } = require('../utils/utils');
 const config = require('../../config/default');
 
 const router = express.Router();
@@ -20,7 +21,7 @@ router.get('/streams', (_req, res) => {
 });
 
 // Endpoint para iniciar sesión
-router.post('/api/login', (req, res) => {
+router.post('/api/login', async (req, res) => {
     // Obtenemos el usuario y contraseña de la solicitud
     const username = req.body.username;
     const password = req.body.password;
@@ -32,14 +33,19 @@ router.post('/api/login', (req, res) => {
 
     try {
         // Hacemos una consulta a la base de datos para obtener el usuario correspondiente a los datos introducidos
-        const user = db.prepare('SELECT * FROM users WHERE username = ? AND password = ?').get(username, password);
+        const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
 
         // Comprobamos si el usuario existe
         if (user) {
-            // Enviamos el ID del usuario en la respuesta
-            res.status(200).send(`${user.id}`);
+            // Verificamos la contraseña
+            if (await verifyPassword(password, user.password)) {
+                // Enviamos el ID del usuario en la respuesta
+                res.status(200).send(`${user.id}`);
+            } else {
+                res.status(401).send('Wrong password');
+            }
         } else {
-            res.status(401).send('Wrong user or password');
+            res.status(401).send('User does not exist');
         }
     } catch (error) {
         console.error(error);
@@ -48,7 +54,7 @@ router.post('/api/login', (req, res) => {
 });
 
 // Endpoint para registrar un usuario
-router.post('/api/register', (req, res) => {
+router.post('/api/register', async (req, res) => {
     // Obtenemos el usuario y contraseña de la solicitud
     const username = req.body.username;
     const password = req.body.password;
@@ -67,8 +73,11 @@ router.post('/api/register', (req, res) => {
             return res.status(409).send('User already exists');
         }
 
+        // Hasheamos la contraseña
+        const hashedPassword = await hashPassword(password);
+
         // Insertamos el nuevo usuario a la base de datos
-        const result = db.prepare('INSERT INTO users (username, password) VALUES (?, ?)').run(username, password);
+        const result = db.prepare('INSERT INTO users (username, password) VALUES (?, ?)').run(username, hashedPassword);
         // Obtenemos el ID del usuario
         const userID = result.lastInsertRowid;
 
