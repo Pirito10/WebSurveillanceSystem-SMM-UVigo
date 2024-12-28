@@ -34,6 +34,14 @@ const addStream = (videoSrc) => {
         const hls = new Hls();
         hls.loadSource(videoSrc);
         hls.attachMedia(video);
+
+        // Manejamos los errores de HLS
+        hls.on(Hls.Events.ERROR, function (_event, data) {
+            if (data.fatal) {
+                console.error('HLS.js encountered a fatal error:', data);
+            }
+        });
+
         // Comprobamos si el navegador tiene soporte nativo para HLS (Safari)
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = videoSrc;
@@ -81,18 +89,12 @@ document.getElementById('addStreamButton').addEventListener('click', async () =>
             // Obtenemos el nombre del flujo de la respuesta
             const streamName = await response.text();
 
+            // Llamamos al correspondiente comando FFmpeg en el servidor
+            requestFFmpeg(streamName, streamUrl);
+
             // Obtenemos la fuente del flujo y la añadimos
             const videoSrc = `/hls/${streamName}/output.m3u8`;
             addStream(videoSrc);
-
-            // Llamamos al comando FFmpeg en el servidor
-            await fetch('/api/start-ffmpeg', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ streamName, streamUrl }),
-            });
         } else {
             console.error(await response.text());
         }
@@ -131,20 +133,33 @@ window.onload = async () => {
                 // Añadimos el reproductor para cada flujo
                 const videoSrc = `/hls/${streamName}/output.m3u8`;
                 addStream(videoSrc);
-
-                // Llamamos al correspondiente comando FFmpeg en el servidor
-                await fetch('/api/start-ffmpeg', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ streamName, streamUrl }),
-                });
             });
         } else {
             console.error(await response.text());
         }
     } catch (error) {
         console.error(error);
+    }
+};
+
+// Función para solicitar el arranque de un proceso FFmpeg
+const requestFFmpeg = async (streamName, streamUrl) => {
+    try {
+        // Solicitamos al servidor que inicie un proceso FFmpeg
+        const response = await fetch('/api/start-ffmpeg', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ streamName, streamUrl }),
+        });
+
+        if (response.ok) {
+            console.log(`FFmpeg started successfully for stream ${streamName}`);
+        } else {
+            console.error(`Failed to start FFmpeg for stream ${streamName}:`, await response.text());
+        }
+    } catch (error) {
+        console.error('Error requesting FFmpeg:', error);
     }
 };
