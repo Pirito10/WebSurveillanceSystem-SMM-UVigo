@@ -33,13 +33,16 @@ const startFFmpeg = (id, inputUrl, params = {}) => {
     }
 
     // Obtenemos los parámetros configurables
+    const codec = params.codec || config.ffmpeg.customParams.codec;
+    const resolution = params.resolution || config.ffmpeg.customParams.resolution;
+    const preset = params.preset || config.ffmpeg.customParams.preset;
     const bitrate = params.bitrate || config.ffmpeg.customParams.bitrate;
     const maxrate = `${parseInt(bitrate) * 2}k`;
     const bufsize = `${parseInt(maxrate) * 2}k`;
     const customParams = [
-        '-c:v', params.codec || config.ffmpeg.customParams.codec,
-        '-vf', `scale=${params.resolution || config.ffmpeg.customParams.resolution}`,
-        '-preset', params.preset || config.ffmpeg.customParams.preset,
+        '-c:v', codec,
+        '-vf', `scale=${resolution}`,
+        '-preset', preset,
         '-b:v', bitrate,
         '-maxrate', maxrate,
         '-bufsize', bufsize,
@@ -53,7 +56,12 @@ const startFFmpeg = (id, inputUrl, params = {}) => {
         .outputOptions(allParams) // Parámetros
         .output(outputFile) // Fichero de salida
         .on('start', () => {
-            console.log(`[FFmpeg - ${id}] Starting on URL: ${inputUrl}`);
+            console.log(`[FFmpeg - ${id}] Starting on URL ${inputUrl} with parameters:`);
+            console.log(`\tCodec: ${codec}`);
+            console.log(`\tResolution: ${resolution}`);
+            console.log(`\tFramerate: ${params.framerate || 'Default'}`);
+            console.log(`\tPreset: ${preset}`);
+            console.log(`\tBitrate: ${bitrate}`);
         })
         .on('stderr', (stderrLine) => {
             logStream.write(`${stderrLine}\n`);
