@@ -16,15 +16,15 @@ module.exports = {
     },
     ffmpeg: {
         baseParams: [
-            '-c:v', 'libx264', // Codec de video
-            '-preset', 'veryfast', // Preset para velocidad/calidad
             '-tune', 'zerolatency', // Ajuste para transmisión en vivo
-            '-b:v', '1500k', // Tasa de bits del video
-            '-maxrate', '1500k', // Tasa máxima de bits
-            '-bufsize', '3000k', // Tamaño del buffer
-            '-vf', 'scale=1280:720', // Resolución de salida
             '-an', // Sin audio
         ],
+        customParams: {
+            codec: 'libx264', // Codec de video
+            resolution: '1280:720', // Resolución de salida
+            preset: 'veryfast', // Preset para velocidad/calidad
+            bitrate: '1500k', // Tasa de bits del video
+        },
         hlsParams: [
             '-f', 'hls', // Formato de salida
             '-hls_time', '1', // Duración de los segmentos

@@ -12,9 +12,9 @@ const logsFolder = path.resolve(config.paths.logsFolder);
 const outputFolder = path.resolve(config.paths.outputFolder);
 
 // Función para lanzar FFmpeg
-const startFFmpeg = (id, inputUrl) => {
+const startFFmpeg = (id, inputUrl, params = {}) => {
 
-    // Crear subdirectorio para el ID si no existe
+    // Creamos el subdirectorio para el ID si no existe
     const streamOutputFolder = path.join(outputFolder, id);
     createDirectory(streamOutputFolder, `FFmpeg - ${id}`);
 
@@ -32,13 +32,26 @@ const startFFmpeg = (id, inputUrl) => {
         delete ffmpegProcesses[id];// Eliminar el proceso del mapa
     }
 
-    // Crear el comando ffmpeg
+    // Obtenemos los parámetros configurables
+    const bitrate = params.bitrate || config.ffmpeg.customParams.bitrate;
+    const maxrate = `${parseInt(bitrate) * 2}k`;
+    const bufsize = `${parseInt(maxrate) * 2}k`;
+    const customParams = [
+        '-c:v', params.codec || config.ffmpeg.customParams.codec,
+        '-vf', `scale=${params.resolution || config.ffmpeg.customParams.resolution}`,
+        '-preset', params.preset || config.ffmpeg.customParams.preset,
+        '-b:v', bitrate,
+        '-maxrate', maxrate,
+        '-bufsize', bufsize,
+    ];
+
+    // Creamos la lista de parámetros completa
+    const allParams = [...config.ffmpeg.baseParams, ...customParams, ...config.ffmpeg.hlsParams];
+
+    // Creamos el comando ffmpeg
     const process = ffmpeg(inputUrl)
-        .outputOptions([
-            ...config.ffmpeg.baseParams, // Parámetros básicos
-            ...config.ffmpeg.hlsParams, // Parámetros específicos de HLS
-        ])
-        .output(outputFile) // Archivo de salida
+        .outputOptions(allParams) // Parámetros
+        .output(outputFile) // Fichero de salida
         .on('start', () => {
             console.log(`[FFmpeg - ${id}] Starting on URL: ${inputUrl}`);
         })
@@ -53,10 +66,10 @@ const startFFmpeg = (id, inputUrl) => {
             delete ffmpegProcesses[id];
         });
 
-    // Iniciar el proceso
+    // Iniciamos el proceso
     process.run();
 
-    // Guardar el proceso en el mapa
+    // Guardamos el proceso en el mapa
     ffmpegProcesses[id] = process;
 };
 
