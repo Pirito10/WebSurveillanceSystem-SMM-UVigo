@@ -37,10 +37,13 @@ const addStream = (streamName, streamUrl) => {
         hls.loadSource(videoSrc);
         hls.attachMedia(video);
 
+        //TODO quitar lo de los 20s
+
         // Manejamos los errores de HLS
         hls.on(Hls.Events.ERROR, function (_event, data) {
             if (data.fatal) {
                 console.error('HLS.js encountered a fatal error:', data);
+                hls.startLoad();
             }
         });
 
@@ -139,7 +142,10 @@ window.onload = async () => {
                 const streamName = stream.name;
                 const streamUrl = stream.url;
 
-                // Añadimos el reproductor a la interfaz para cada flujo
+                // Llamamos al correspondiente comando FFmpeg en el servidor
+                requestFFmpeg(streamName, streamUrl);
+
+                // Añadimos el flujo a la interfaz
                 addStream(streamName, streamUrl);
             });
         } else {
