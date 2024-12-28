@@ -20,7 +20,7 @@ const adjustGrid = () => {
 };
 
 // Función para añadir un nuevo flujo
-const addStream = (videoSrc) => {
+const addStream = (streamName, streamUrl) => {
     // Creamos un contenedor para cada flujo
     const videoWrapper = document.createElement('div');
 
@@ -33,6 +33,7 @@ const addStream = (videoSrc) => {
     if (Hls.isSupported()) {
         // Cargamos el flujo de vídeo y lo conectamos al reproductor
         const hls = new Hls();
+        const videoSrc = `/hls/${streamName}/output.m3u8`;
         hls.loadSource(videoSrc);
         hls.attachMedia(video);
 
@@ -52,7 +53,7 @@ const addStream = (videoSrc) => {
     const configButton = document.createElement('button');
     configButton.textContent = 'Settings';
     configButton.addEventListener('click', () => {
-        openConfigModal();
+        openConfigModal(streamName, streamUrl);
     });
 
     // Añadimos el vídeo a su contenedor, y el contenedor al grid
@@ -101,9 +102,8 @@ document.getElementById('addStreamButton').addEventListener('click', async () =>
             // Llamamos al correspondiente comando FFmpeg en el servidor
             requestFFmpeg(streamName, streamUrl);
 
-            // Obtenemos la fuente del flujo y la añadimos
-            const videoSrc = `/hls/${streamName}/output.m3u8`;
-            addStream(videoSrc);
+            // Añadimos el flujo a la interfaz
+            addStream(streamName, streamUrl);
         } else {
             console.error(await response.text());
         }
@@ -139,9 +139,8 @@ window.onload = async () => {
                 const streamName = stream.name;
                 const streamUrl = stream.url;
 
-                // Añadimos el reproductor para cada flujo
-                const videoSrc = `/hls/${streamName}/output.m3u8`;
-                addStream(videoSrc);
+                // Añadimos el reproductor a la interfaz para cada flujo
+                addStream(streamName, streamUrl);
             });
         } else {
             console.error(await response.text());
@@ -152,20 +151,25 @@ window.onload = async () => {
 };
 
 // Función para solicitar el arranque de un proceso FFmpeg
-const requestFFmpeg = async (streamName, streamUrl) => {
+const requestFFmpeg = async (streamName, streamUrl, customParams = {}) => {
     try {
+        // Creamos el cuerpo de la solicitud
+        const payload = {
+            streamName,
+            streamUrl,
+            params: customParams, // Incluímos los parámetros configurables si los hay
+        };
+
         // Solicitamos al servidor que inicie un proceso FFmpeg
         const response = await fetch('/api/start-ffmpeg', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ streamName, streamUrl }),
+            body: JSON.stringify(payload),
         });
 
-        if (response.ok) {
-            console.log(`FFmpeg started successfully for stream ${streamName}`);
-        } else {
+        if (!response.ok) {
             console.error(`Failed to start FFmpeg for stream ${streamName}:`, await response.text());
         }
     } catch (error) {
@@ -174,7 +178,7 @@ const requestFFmpeg = async (streamName, streamUrl) => {
 };
 
 // Función para abrir la ventana de configuración
-const openConfigModal = () => {
+const openConfigModal = (streamName, streamUrl) => {
     // Mostramos la ventana
     const modal = document.getElementById('configModal');
     modal.style.display = 'flex';
@@ -198,6 +202,9 @@ const openConfigModal = () => {
             preset: formData.get('preset'),
             bitrate: formData.get('bitrate'),
         };
+
+        // Reiniciamos el flujo con los nuevos parámetros
+        requestFFmpeg(streamName, streamUrl, config);
 
         // Ocultamos el modal
         modal.style.display = 'none';
