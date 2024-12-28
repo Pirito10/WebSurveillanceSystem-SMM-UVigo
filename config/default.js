@@ -28,7 +28,7 @@ module.exports = {
         hlsParams: [
             '-f', 'hls', // Formato de salida
             '-hls_time', '1', // Duración de los segmentos
-            '-hls_list_size', '3', // Número máximo de segmentos en la lista
+            '-hls_list_size', '10', // Número máximo de segmentos en la lista
             '-hls_flags', 'delete_segments+append_list+split_by_time', // Flags adicionales para HLS
         ],
     },
