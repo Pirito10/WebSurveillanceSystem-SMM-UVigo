@@ -28,6 +28,56 @@
         <section id="videos" class="videos-container"></section>
     </main>
 
+    <!-- Ventana para configuración de flujo -->
+    <div id="configModal" class="modal">
+        <div class="modal-content">
+            <h3>Stream Configuration</h3>
+            <form id="configForm">
+                <!-- Resolución -->
+                <label>Resolution</label>
+                <select name="resolution">
+                    <option value="1920x1080">1920x1080</option>
+                    <option value="1280x720">1280x720</option>
+                    <option value="640x480">640x480</option>
+                </select>
+
+                <!-- Framerate -->
+                <label>Framerate (fps)</label>
+                <input type="number" name="framerate" placeholder="30" min="1">
+
+                <!-- Codec -->
+                <label>Codec</label>
+                <select name="codec">
+                    <option value="libx264">H.264</option>
+                    <option value="libx265">H.265</option>
+                    <option value="libvpx-vp9">VP9</option>
+                </select>
+
+                <!-- Preset -->
+                <label>Preset</label>
+                <select name="preset">
+                    <option value="ultrafast">Ultra Fast</option>
+                    <option value="superfast">Super Fast</option>
+                    <option value="veryfast">Very Fast</option>
+                    <option value="faster">Faster</option>
+                    <option value="fast">Fast</option>
+                    <option value="medium">Medium</option>
+                    <option value="slow">Slow</option>
+                    <option value="slower">Slower</option>
+                    <option value="veryslow">Very Slow</option>
+                </select>
+
+                <!-- Bitrate -->
+                <label>Bitrate (kbps)</label>
+                <input type="number" name="bitrate" placeholder="1500" min="100">
+            </form>
+
+            <!-- Botones de aplicar y cancelar -->
+            <button id="applyConfig" class="modal-button">Apply</button>
+            <button id="closeModal" class="modal-button cancel">Cancel</button>
+        </div>
+    </div>
+
     <script src="streams.js"></script>
 </body>
 

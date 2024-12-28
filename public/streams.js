@@ -23,6 +23,7 @@ const adjustGrid = () => {
 const addStream = (videoSrc) => {
     // Creamos un contenedor para cada flujo
     const videoWrapper = document.createElement('div');
+
     // Creamos su elemento 'video'
     const video = document.createElement('video');
     video.controls = true;
@@ -47,8 +48,16 @@ const addStream = (videoSrc) => {
         video.src = videoSrc;
     }
 
+    // Creamos el botón de configuración
+    const configButton = document.createElement('button');
+    configButton.textContent = 'Settings';
+    configButton.addEventListener('click', () => {
+        openConfigModal();
+    });
+
     // Añadimos el vídeo a su contenedor, y el contenedor al grid
     videoWrapper.appendChild(video);
+    videoWrapper.appendChild(configButton);
     videosContainer.appendChild(videoWrapper);
 
     // Reajustamos el grid
@@ -162,4 +171,35 @@ const requestFFmpeg = async (streamName, streamUrl) => {
     } catch (error) {
         console.error('Error requesting FFmpeg:', error);
     }
+};
+
+// Función para abrir la ventana de configuración
+const openConfigModal = () => {
+    // Mostramos la ventana
+    const modal = document.getElementById('configModal');
+    modal.style.display = 'flex';
+
+    // Añadimos el botón de cerrar
+    const closeModal = document.getElementById('closeModal');
+    closeModal.onclick = () => {
+        // Ocultamos el modal
+        modal.style.display = 'none';
+    };
+
+    // Añadimos el botón de aplicar
+    const applyButton = document.getElementById('applyConfig');
+    applyButton.onclick = () => {
+        const form = document.getElementById('configForm');
+        const formData = new FormData(form);
+        const config = {
+            resolution: formData.get('resolution'),
+            framerate: formData.get('framerate'),
+            codec: formData.get('codec'),
+            preset: formData.get('preset'),
+            bitrate: formData.get('bitrate'),
+        };
+
+        // Ocultamos el modal
+        modal.style.display = 'none';
+    };
 };
