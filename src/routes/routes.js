@@ -148,10 +148,11 @@ router.post('/api/start-ffmpeg', (req, res) => {
     // Obtenemos el ID y la URL de la solicitud
     const streamName = req.body.streamName;
     const streamUrl = req.body.streamUrl;
+    const params = req.body.params;
 
     // Intentamos ejecutar el comando FFmpeg correspondiente
     try {
-        startFFmpeg(streamName, streamUrl);
+        startFFmpeg(streamName, streamUrl, params);
         res.status(200).send();
     } catch (error) {
         console.error(error);
