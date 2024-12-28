@@ -23,6 +23,7 @@ module.exports = {
         customParams: {
             codec: 'libx264', // Codec de video
             resolution: '1280:720', // Resolución de salida
+            framerate: '30', // Fotogramas por segundo
             preset: 'fast', // Preset para velocidad/calidad
             bitrate: '1500k' // Tasa de bits del video
         },

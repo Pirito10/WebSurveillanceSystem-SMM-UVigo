@@ -35,6 +35,7 @@ const startFFmpeg = (id, inputUrl, params = {}) => {
     // Obtenemos los parámetros configurables
     const codec = params.codec || config.ffmpeg.customParams.codec;
     const resolution = params.resolution || config.ffmpeg.customParams.resolution;
+    const framerate = params.framerate || config.ffmpeg.customParams.framerate;
     const preset = params.preset || config.ffmpeg.customParams.preset;
     const bitrate = params.bitrate || config.ffmpeg.customParams.bitrate;
     const maxrate = `${parseInt(bitrate) * 2}k`;
@@ -42,6 +43,7 @@ const startFFmpeg = (id, inputUrl, params = {}) => {
     const customParams = [
         '-c:v', codec,
         '-vf', `scale=${resolution}`,
+        '-r', framerate,
         '-preset', preset,
         '-b:v', bitrate,
         '-maxrate', maxrate,
