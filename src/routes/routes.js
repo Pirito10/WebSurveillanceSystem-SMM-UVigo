@@ -152,7 +152,7 @@ router.post('/api/start-ffmpeg', (req, res) => {
     // Intentamos ejecutar el comando FFmpeg correspondiente
     try {
         startFFmpeg(streamName, streamUrl);
-        res.status(200);
+        res.status(200).send();
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal error');
