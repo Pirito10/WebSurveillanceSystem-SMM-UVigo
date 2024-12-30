@@ -12,7 +12,7 @@ const logsFolder = path.resolve(config.paths.logsFolder);
 const outputFolder = path.resolve(config.paths.outputFolder);
 
 // Función para lanzar FFmpeg
-const startFFmpeg = (id, inputUrl, params = {}) => {
+const startFFmpeg = async (id, inputUrl, params = {}) => {
 
     // Creamos el subdirectorio para el ID si no existe
     const streamOutputFolder = path.join(outputFolder, id);
@@ -25,11 +25,9 @@ const startFFmpeg = (id, inputUrl, params = {}) => {
     const logFilePath = path.join(logsFolder, `${id}.log`);
     const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Abrir en modo append
 
-    // Reinicia el proceso si ya existía
+    // Reiniciamos el proceso si ya existía
     if (ffmpegProcesses[id]) {
-        console.log(`[FFmpeg - ${id}] Was already running. Stopping...`);
-        ffmpegProcesses[id].kill('SIGINT'); // Detener proceso anterior
-        delete ffmpegProcesses[id];// Eliminar el proceso del mapa
+        await stopFFmpeg(id);
     }
 
     // Obtenemos los parámetros configurables
@@ -63,14 +61,18 @@ const startFFmpeg = (id, inputUrl, params = {}) => {
             console.log(`\tResolution: ${resolution}`);
             console.log(`\tFramerate: ${framerate}`);
             console.log(`\tPreset: ${preset}`);
-            console.log(`\tBitrate: ${bitrate}`);
+            console.log(`\tBitrate: ${bitrate}\n`);
         })
         .on('stderr', (stderrLine) => {
             logStream.write(`${stderrLine}\n`);
         })
         .on('error', (err) => {
-            console.log(`[FFmpeg - ${id}] ${err}`);
-            delete ffmpegProcesses[id];
+            if (err == "Error: ffmpeg was killed with signal SIGINT") {
+                console.log(`[FFmpeg - ${id}] Stopped\n`);
+            } else {
+                console.log(`[FFmpeg - ${id}] ${err}\n`);
+                stopFFmpeg(id);
+            }
         })
         .on('end', () => {
             delete ffmpegProcesses[id];
@@ -85,13 +87,18 @@ const startFFmpeg = (id, inputUrl, params = {}) => {
 
 // Función para detener un proceso FFmpeg
 const stopFFmpeg = (id) => {
-    if (ffmpegProcesses[id]) {
-        console.log(`[FFmpeg - ${id}] Stopping...`);
+    // Creamos una promesa
+    return new Promise((resolve) => {
+        // Escuchamos el evento de error para saber que el proceso ha terminad
+        ffmpegProcesses[id].on('error', () => {
+            // Eliminamos el proceso del mapa
+            delete ffmpegProcesses[id];
+            // Resolvemos la promesa
+            resolve();
+        });
+        // Enviamos la señal para terminal el proceso
         ffmpegProcesses[id].kill('SIGINT');
-        delete ffmpegProcesses[id];
-    } else {
-        console.log(`[FFmpeg - ${id}] Process does not exist`);
-    }
+    })
 };
 
 module.exports = startFFmpeg;
