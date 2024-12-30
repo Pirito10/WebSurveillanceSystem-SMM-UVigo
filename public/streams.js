@@ -32,12 +32,20 @@ const addStream = (streamName, streamUrl) => {
     // Comprobamos si el navegador soporta HLS.js
     if (Hls.isSupported()) {
         // Cargamos el flujo de vídeo y lo conectamos al reproductor
-        const hls = new Hls();
+        const hls = new Hls({
+            // Hacemos una solicitud al manifiesto cada segundo
+            manifestLoadPolicy: {
+                default: {
+                    maxLoadTimeMs: 1000,
+                    timeoutRetry: {
+                        maxNumRetry: 10
+                    }
+                }
+            }
+        });
         const videoSrc = `/hls/${streamName}/output.m3u8`;
         hls.loadSource(videoSrc);
         hls.attachMedia(video);
-
-        //TODO quitar lo de los 20s
 
         // Manejamos los errores de HLS
         hls.on(Hls.Events.ERROR, function (_event, data) {
