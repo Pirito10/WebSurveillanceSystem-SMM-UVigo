@@ -20,7 +20,7 @@ module.exports = {
             '-an', // Sin audio
             '-g 60' // Un keyframe cada 60 frames
         ],
-        customParams: {
+        defaultParams: {
             codec: 'libx264', // Codec de video
             resolution: '1280:720', // Resolución de salida
             framerate: '30', // Fotogramas por segundo

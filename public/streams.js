@@ -196,13 +196,11 @@ const openConfigModal = (streamName, streamUrl) => {
         const form = document.getElementById('configForm');
         const formData = new FormData(form);
         const params = {
-            // TODO test codecs y presets
-            // TODO añadir verificación de los campos
             codec: formData.get('codec'),
             resolution: formData.get('resolution'),
             framerate: formData.get('framerate'),
             preset: formData.get('preset'),
-            bitrate: formData.get('bitrate'),
+            bitrate: `${formData.get('bitrate')}k`,
         };
 
         // Actualizamos los parámetros del flujo en la base de datos
