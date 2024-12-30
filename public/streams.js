@@ -157,29 +157,22 @@ window.onload = async () => {
 };
 
 // Función para solicitar el arranque de un proceso FFmpeg
-const requestFFmpeg = async (streamName, streamUrl, customParams = {}) => {
+const requestFFmpeg = async (streamName, streamUrl) => {
     try {
-        // Creamos el cuerpo de la solicitud
-        const payload = {
-            streamName,
-            streamUrl,
-            params: customParams, // Incluímos los parámetros configurables si los hay
-        };
-
         // Solicitamos al servidor que inicie un proceso FFmpeg
         const response = await fetch('/api/start-ffmpeg', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({ streamName, streamUrl }),
         });
 
         if (!response.ok) {
             console.error(`Failed to start FFmpeg for stream ${streamName}:`, await response.text());
         }
     } catch (error) {
-        console.error('Error requesting FFmpeg:', error);
+        console.error(error);
     }
 };
 
@@ -198,21 +191,42 @@ const openConfigModal = (streamName, streamUrl) => {
 
     // Añadimos el botón de aplicar
     const applyButton = document.getElementById('applyConfig');
-    applyButton.onclick = () => {
+    applyButton.onclick = async () => {
+        // Obtenemos los datos del formulario
         const form = document.getElementById('configForm');
         const formData = new FormData(form);
-        const config = {
+        const params = {
+            // TODO test codecs y presets
+            // TODO añadir verificación de los campos
+            codec: formData.get('codec'),
             resolution: formData.get('resolution'),
             framerate: formData.get('framerate'),
-            codec: formData.get('codec'),
             preset: formData.get('preset'),
             bitrate: formData.get('bitrate'),
         };
 
-        // Reiniciamos el flujo con los nuevos parámetros
-        requestFFmpeg(streamName, streamUrl, config);
+        // Actualizamos los parámetros del flujo en la base de datos
+        try {
+            const response = await fetch(`/api/streams/${streamName}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ params }),
+            });
 
-        // Ocultamos el modal
-        modal.style.display = 'none';
+            if (!response.ok) {
+                console.error('Failed to update stream parameters in the database:', await response.text());
+                return;
+            }
+
+            // Reiniciamos el flujo
+            requestFFmpeg(streamName, streamUrl);
+
+            // Ocultamos el modal
+            modal.style.display = 'none';
+        } catch {
+            console.error(error);
+        }
     };
 };
