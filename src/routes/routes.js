@@ -112,6 +112,27 @@ router.post('/api/streams', (req, res) => {
     }
 });
 
+// Endpoint para actualizar los parámetros de un flujo en la base de datos
+router.put('/api/streams/:name', (req, res) => {
+    // Obtenemos el nombre del flujo y los parámetros de la solicitud
+    const streamName = req.params.name;
+    const params = req.body.params;
+
+    try {
+        // Actualizamos los parámetros del flujo en la base de datos
+        db.prepare(`
+            UPDATE streams
+            SET codec = ?, resolution = ?, framerate = ?, preset = ?, bitrate = ?
+            WHERE name = ?
+        `).run(params.codec || config.ffmpeg.defaultParams.codec, params.resolution || config.ffmpeg.defaultParams.resolution, params.framerate || config.ffmpeg.defaultParams.framerate, params.preset || config.ffmpeg.defaultParams.preset, params.bitrate || config.ffmpeg.defaultParams.bitrate, streamName);
+
+        res.status(200).send();
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal error');
+    }
+});
+
 // Endpoint para devolver los flujos de un usuario
 router.get('/api/streams/:userID', (req, res) => {
     // Obtenemos el usuario de la solicitud
@@ -148,10 +169,16 @@ router.post('/api/start-ffmpeg', (req, res) => {
     // Obtenemos el ID y la URL de la solicitud
     const streamName = req.body.streamName;
     const streamUrl = req.body.streamUrl;
-    const params = req.body.params;
 
     // Intentamos ejecutar el comando FFmpeg correspondiente
     try {
+        // Obtenemos los parámetros configurables del flujo de la base de datos
+        const params = db.prepare(`
+            SELECT codec, resolution, framerate, preset, bitrate
+            FROM streams
+            WHERE name = ?
+        `).get(streamName);
+
         startFFmpeg(streamName, streamUrl, params);
         res.status(200).send();
     } catch (error) {
