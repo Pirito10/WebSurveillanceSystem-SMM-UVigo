@@ -35,6 +35,11 @@ try {
             user_id INTEGER NOT NULL,
             name TEXT UNIQUE,
             url TEXT NOT NULL,
+            codec TEXT DEFAULT '${config.ffmpeg.defaultParams.codec}',
+            resolution TEXT DEFAULT '${config.ffmpeg.defaultParams.resolution}',
+            framerate TEXT DEFAULT '${config.ffmpeg.defaultParams.framerate}',
+            preset TEXT DEFAULT '${config.ffmpeg.defaultParams.preset}',
+            bitrate TEXT DEFAULT '${config.ffmpeg.defaultParams.bitrate}',
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
     `).run();
