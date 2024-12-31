@@ -239,12 +239,8 @@ const openConfigModal = (streamName, streamUrl) => {
             resolution: formData.get('resolution'),
             framerate: formData.get('framerate'),
             preset: formData.get('preset'),
-            bitrate: formData.get('bitrate'),
+            bitrate: formData.get('bitrate') ? `${formData.get('bitrate')}k` : '',
         };
-
-        if (params.bitrate) {
-            params.bitrate = `${params.bitrate}k`;
-        }
 
         // Actualizamos los parámetros del flujo en la base de datos
         try {
