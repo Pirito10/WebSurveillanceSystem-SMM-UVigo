@@ -253,19 +253,132 @@ video {
 }
 
 .modal-button.cancel {
-    background-color: #ff4d4f;
+    background-color: var(--color-danger);
     color: white;
 }
 
 .modal-button.cancel:hover {
-    background-color: #d9363e;
+    background-color: var(--color-danger-hover);
 }
 
 .modal-button:not(.cancel) {
-    background-color: #28a745;
+    background-color: var(--color-success);
     color: white;
 }
 
 .modal-button:not(.cancel):hover {
-    background-color: #218838;
+    background-color: var(--color-success-hover);
+}
+
+/* Contenedor para los botones y el switch */
+.button-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Botones alineados */
+button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Botón de configuración */
+.config-button {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.config-button:hover {
+    background-color: var(--color-primary-hover);
+}
+
+/* Botón de guardar grabación */
+.save-button {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.save-button:hover {
+    background-color: var(--color-success-hover);
+}
+
+/* Botón de eliminar */
+.delete-button {
+    background-color: var(--color-danger);
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: var(--color-danger-hover);
+}
+
+/* Botón deshabilitado */
+button:disabled {
+    background-color: #e0e0e0;
+    color: #8c8c8c;
+    cursor: not-allowed;
+}
+
+/* Switch Container */
+.switch-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Switch Label */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+/* Hide Default Checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Background of the Switch */
+.switch .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: background-color 0.3s;
+    border-radius: 20px;
+}
+
+/* Circle Inside the Switch */
+.switch .slider::before {
+    content: "";
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: transform 0.3s;
+    border-radius: 50%;
+}
+
+/* Change Background and Move Circle When Checked */
+.switch input:checked+.slider {
+    background-color: var(--color-primary);
+}
+
+.switch input:checked+.slider::before {
+    transform: translateX(20px);
 }
