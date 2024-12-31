@@ -135,6 +135,11 @@ const recordStream = async (streamName) => {
         // Creamos el fichero de salida
         const outputFile = path.join(outputFolder, streamName, `output.mp4`);
 
+        // Verificamos que el manifiesto exista
+        if (!fs.existsSync(inputFile)) {
+            return reject(`[FFmpeg - ${streamName}] Input file not found: ${inputFile}\n`);
+        }
+
         // Ejecutamos el comando FFmpeg
         ffmpeg()
             .input(inputFile) // Fichero de entrada
@@ -145,7 +150,7 @@ const recordStream = async (streamName) => {
             })
             .on('error', (err) => {
                 console.error(`[FFmpeg - ${streamName}] ${err}`);
-                reject();
+                reject(`[FFmpeg - ${streamName}] Recording process failed`);
             })
             .on('end', () => {
                 console.log(`[FFmpeg - ${streamName}] Recording successful\n`);
