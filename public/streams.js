@@ -125,7 +125,7 @@ const addStream = (streamName, streamUrl) => {
     recordSwitchInput.type = 'checkbox';
     recordSwitchInput.checked = false;
     recordSwitchInput.addEventListener('change', () => {
-        toggleRecording(streamName, recordSwitchInput.checked);
+        toggleRecording(streamName, streamUrl, recordSwitchInput.checked);
     });
     recordSwitchLabel.appendChild(recordSwitchInput);
     recordSwitch.appendChild(recordSwitchLabel);
@@ -250,8 +250,8 @@ const requestFFmpeg = async (streamName, streamUrl) => {
     }
 };
 
-// Función para iniciar la grabación de un flujo
-const toggleRecording = async (streamName, isRecording) => {
+// Función para cambiar el estado de la grabación de un flujo
+const toggleRecording = async (streamName, streamUrl, isRecording) => {
     // Actualizamos el estado de grabación del flujo en la base de datos
     try {
         const response = await fetch(`/api/streams/${streamName}/record`, {
@@ -263,7 +263,8 @@ const toggleRecording = async (streamName, isRecording) => {
         });
 
         if (response.ok) {
-            console.log(`Recording ${isRecording ? 'started' : 'stopped'} for stream ${streamName}`);
+            // Reiniciamos el flujo
+            requestFFmpeg(streamName, streamUrl);
         } else {
             console.error(await response.text());
         }
