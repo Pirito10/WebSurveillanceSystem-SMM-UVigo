@@ -15,12 +15,12 @@ module.exports = {
         }
     },
     ffmpeg: {
-        keyframeInterval: '60', // Un keyframe cada 60 frames
         baseParams: [
             '-tune zerolatency', // Ajuste para transmisión en vivo
             '-an', // Sin audio
-            '-g', this.keyframeInterval
+            '-g 60' // Un keyframe cada 60 frames
         ],
+        keyframeInterval: '60',
         defaultParams: {
             codec: 'libx264', // Codec de video
             resolution: '1280:720', // Resolución de salida
