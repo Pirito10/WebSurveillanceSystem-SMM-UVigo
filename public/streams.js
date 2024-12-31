@@ -113,6 +113,7 @@ const addStream = (streamName, streamUrl, recording = false) => {
 
     // Creamos el botón de configuración
     const configButton = document.createElement('button');
+    configButton.className = 'config-button';
     configButton.textContent = 'Settings';
     configButton.addEventListener('click', () => {
         configureStream(streamName, streamUrl);
@@ -120,7 +121,9 @@ const addStream = (streamName, streamUrl, recording = false) => {
 
     // Creamos el selector de comenzar grabación
     const recordSwitch = document.createElement('div');
+    recordSwitch.className = 'switch-container';
     const recordSwitchLabel = document.createElement('label');
+    recordSwitchLabel.className = 'switch';
     const recordSwitchInput = document.createElement('input');
     recordSwitchInput.type = 'checkbox';
     recordSwitchInput.checked = recording;
@@ -129,11 +132,15 @@ const addStream = (streamName, streamUrl, recording = false) => {
         // Cambiamos el estado de botón de guardar grabación
         saveButton.disabled = !recordSwitchInput.checked;
     });
+    const recordSwitchSlider = document.createElement('span');
+    recordSwitchSlider.className = 'slider';
     recordSwitchLabel.appendChild(recordSwitchInput);
+    recordSwitchLabel.appendChild(recordSwitchSlider);
     recordSwitch.appendChild(recordSwitchLabel);
 
     // Creamos el botón de guardar grabación
     const saveButton = document.createElement('button');
+    saveButton.className = 'save-button';
     saveButton.textContent = 'Save recording';
     saveButton.disabled = !recording;
     saveButton.addEventListener('click', () => {
@@ -142,17 +149,23 @@ const addStream = (streamName, streamUrl, recording = false) => {
 
     // Creamos el botón de eliminar
     const deleteButton = document.createElement('button');
+    deleteButton.className = 'delete-button';
     deleteButton.textContent = 'Delete';
     deleteButton.addEventListener('click', async () => {
         removeStream(streamName);
     });
 
-    // Añadimos el vídeo a su contenedor, los botones, y el contenedor al grid
+    // Creamos un contenedor para los botones
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'button-container';
+    buttonContainer.appendChild(configButton);
+    buttonContainer.appendChild(recordSwitch);
+    buttonContainer.appendChild(saveButton);
+    buttonContainer.appendChild(deleteButton);
+
+    // Añadimos el vídeo  y los botones a su contenedor, y el contenedor al grid
     videoWrapper.appendChild(video);
-    videoWrapper.appendChild(configButton);
-    videoWrapper.appendChild(recordSwitch);
-    videoWrapper.appendChild(saveButton);
-    videoWrapper.appendChild(deleteButton);
+    videoWrapper.appendChild(buttonContainer);
     videosContainer.appendChild(videoWrapper);
 
     // Reajustamos el grid
