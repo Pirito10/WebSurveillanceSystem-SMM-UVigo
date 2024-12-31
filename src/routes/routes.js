@@ -1,8 +1,9 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const config = require('../../config/default');
 const db = require('../utils/db');
-const { startFFmpeg, stopFFmpeg } = require('../controllers/ffmpegController');
+const { startFFmpeg, stopFFmpeg, recordStream } = require('../controllers/ffmpegController');
 const { hashPassword, verifyPassword } = require('../utils/utils');
 
 const router = express.Router();
@@ -133,12 +134,37 @@ router.put('/api/streams/:name', (req, res) => {
 router.put('/api/streams/:name/record', (req, res) => {
     // Obtenemos el nombre del flujo y el estado de la grabación de la solicitud
     const streamName = req.params.name;
-    const isRecording = req.body.isRecording;
+    const recording = req.body.recording;
 
     try {
         // Actualizamos el estado de la grabación del flujo en la base de datos
-        db.prepare('UPDATE streams SET recording = ? WHERE name = ?').run(isRecording ? 1 : 0, streamName);
+        db.prepare('UPDATE streams SET recording = ? WHERE name = ?').run(recording ? 1 : 0, streamName);
         res.status(200).send();
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal error');
+    }
+});
+
+// Endpoint para descargar la grabación de un flujo
+router.get('/api/streams/:name/download', async (req, res) => {
+    // Obtenemos el nombre del flujo de la solicitud
+    const streamName = req.params.name;
+
+    try {
+        // Generamos el fichero MP4 con la grabación
+        const recordingFile = await recordStream(streamName);
+
+        // Enviamos el fichero al cliente
+        res.download(recordingFile, `${streamName}.mp4`, (err) => {
+            if (err) {
+                console.error(err);
+                res.status(500).send('Internal error');
+            }
+
+            // Eliminamos el fichero después de enviarlo
+            fs.unlinkSync(recordingFile);
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal error');
