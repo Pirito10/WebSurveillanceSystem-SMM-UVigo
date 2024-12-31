@@ -41,6 +41,7 @@ try {
             preset TEXT DEFAULT '${config.ffmpeg.defaultParams.preset}',
             bitrate TEXT DEFAULT '${config.ffmpeg.defaultParams.bitrate}',
             recording BOOLEAN DEFAULT 0,
+            recordingDuration INTEGER DEFAULT '${config.ffmpeg.recordingParams.duration}',
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
     `).run();
