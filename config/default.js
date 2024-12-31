@@ -27,10 +27,12 @@ module.exports = {
             preset: 'fast', // Preset para velocidad/calidad
             bitrate: '1500k' // Tasa de bits del video
         },
+        recordingParams: [
+            '-hls_list_size', '5' // Número máximo de segmentos en la lista
+        ],
         hlsParams: [
             '-f', 'hls', // Formato de salida
             '-hls_time', '1', // Duración de los segmentos
-            '-hls_list_size', '5', // Número máximo de segmentos en la lista
             '-hls_flags', 'delete_segments+independent_segments+append_list' // Flags adicionales para HLS
         ]
     }
