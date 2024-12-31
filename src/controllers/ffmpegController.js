@@ -70,11 +70,17 @@ const startFFmpeg = async (streamName, streamUrl, params = {}) => {
                 console.log(`[FFmpeg - ${streamName}] Stopped`);
             } else {
                 console.log(`[FFmpeg - ${streamName}] ${err}\n`);
-                stopFFmpeg(streamName);
+                // Eliminamos el proceso del mapa
+                delete ffmpegProcesses[streamName];
+                // Eliminamos el directorio del flujo
+                removeDirectory(path.join(outputFolder, streamName), `FFmpeg - ${streamName}`);
             }
         })
         .on('end', () => {
+            // Eliminamos el proceso del mapa
             delete ffmpegProcesses[streamName];
+            // Eliminamos el directorio del flujo
+            removeDirectory(path.join(outputFolder, streamName), `FFmpeg - ${streamName}`);
         });
 
     // Iniciamos el proceso
@@ -88,21 +94,26 @@ const startFFmpeg = async (streamName, streamUrl, params = {}) => {
 const stopFFmpeg = (streamName) => {
     // Creamos una promesa
     return new Promise((resolve) => {
-        // Escuchamos el evento de error para saber que el proceso ha terminado
-        ffmpegProcesses[streamName].on('error', () => {
-            // Eliminamos el proceso del mapa
-            delete ffmpegProcesses[streamName];
+        if (ffmpegProcesses[streamName]) {
+            // Escuchamos el evento de error para saber que el proceso ha terminado
+            ffmpegProcesses[streamName].on('error', () => {
+                // Eliminamos el proceso del mapa
+                delete ffmpegProcesses[streamName];
 
-            // Eliminamos el directorio del flujo
-            removeDirectory(path.join(outputFolder, streamName), `FFmpeg - ${streamName}`);
+                // Eliminamos el directorio del flujo
+                removeDirectory(path.join(outputFolder, streamName), `FFmpeg - ${streamName}`);
 
+                // Resolvemos la promesa
+                resolve();
+            });
+
+            // Enviamos la señal para terminal el proceso
+            ffmpegProcesses[streamName].kill('SIGINT');
+        } else {
             // Resolvemos la promesa
             resolve();
-        });
-
-        // Enviamos la señal para terminal el proceso
-        ffmpegProcesses[streamName].kill('SIGINT');
-    })
+        }
+    });
 };
 
 module.exports = {
