@@ -209,7 +209,7 @@ router.post('/api/start-ffmpeg', (req, res) => {
 
     try {
         // Obtenemos los parámetros configurables del flujo de la base de datos
-        const params = db.prepare(`SELECT codec, resolution, framerate, preset, bitrate FROM streams WHERE name = ?`).get(streamName);
+        const params = db.prepare(`SELECT codec, resolution, framerate, preset, bitrate, recording FROM streams WHERE name = ?`).get(streamName);
 
         // Iniciamos el proceso FFmpeg
         startFFmpeg(streamName, streamUrl, params);
