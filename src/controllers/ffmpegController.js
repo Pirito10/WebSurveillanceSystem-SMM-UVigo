@@ -12,21 +12,21 @@ const logsFolder = path.resolve(config.paths.logsFolder);
 const outputFolder = path.resolve(config.paths.outputFolder);
 
 // Función para lanzar FFmpeg
-const startFFmpeg = async (id, inputUrl, params = {}) => {
+const startFFmpeg = async (streamName, streamUrl, params = {}) => {
     // Reiniciamos el proceso si ya existía
-    if (ffmpegProcesses[id]) {
-        await stopFFmpeg(id);
+    if (ffmpegProcesses[streamName]) {
+        await stopFFmpeg(streamName);
     }
 
     // Creamos el subdirectorio para el ID si no existe
-    const streamOutputFolder = path.join(outputFolder, id);
-    createDirectory(streamOutputFolder, `FFmpeg - ${id}`);
+    const streamOutputFolder = path.join(outputFolder, streamName);
+    createDirectory(streamOutputFolder, `FFmpeg - ${streamName}`);
 
     // Archivo de salida HLS
     const outputFile = path.join(streamOutputFolder, 'output.m3u8');
 
     // Abrimos el fichero de logs
-    const logFilePath = path.join(logsFolder, `${id}.log`);
+    const logFilePath = path.join(logsFolder, `${streamName}.log`);
     const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Abrir en modo append
 
     // Obtenemos los parámetros configurables
@@ -51,11 +51,11 @@ const startFFmpeg = async (id, inputUrl, params = {}) => {
     const allParams = [...config.ffmpeg.baseParams, ...customParams, ...config.ffmpeg.hlsParams];
 
     // Creamos el comando ffmpeg
-    const process = ffmpeg(inputUrl)
+    const process = ffmpeg(streamUrl)
         .outputOptions(allParams) // Parámetros
         .output(outputFile) // Fichero de salida
         .on('start', () => {
-            console.log(`[FFmpeg - ${id}] Starting on URL ${inputUrl} with parameters:`);
+            console.log(`[FFmpeg - ${streamName}] Starting on URL ${streamUrl} with parameters:`);
             console.log(`\tCodec: ${codec}`);
             console.log(`\tResolution: ${resolution}`);
             console.log(`\tFramerate: ${framerate}`);
@@ -67,41 +67,41 @@ const startFFmpeg = async (id, inputUrl, params = {}) => {
         })
         .on('error', (err) => {
             if (err == "Error: ffmpeg was killed with signal SIGINT") {
-                console.log(`[FFmpeg - ${id}] Stopped`);
+                console.log(`[FFmpeg - ${streamName}] Stopped`);
             } else {
-                console.log(`[FFmpeg - ${id}] ${err}\n`);
-                stopFFmpeg(id);
+                console.log(`[FFmpeg - ${streamName}] ${err}\n`);
+                stopFFmpeg(streamName);
             }
         })
         .on('end', () => {
-            delete ffmpegProcesses[id];
+            delete ffmpegProcesses[streamName];
         });
 
     // Iniciamos el proceso
     process.run();
 
     // Guardamos el proceso en el mapa
-    ffmpegProcesses[id] = process;
+    ffmpegProcesses[streamName] = process;
 };
 
 // Función para detener un proceso FFmpeg
-const stopFFmpeg = (id) => {
+const stopFFmpeg = (streamName) => {
     // Creamos una promesa
     return new Promise((resolve) => {
         // Escuchamos el evento de error para saber que el proceso ha terminado
-        ffmpegProcesses[id].on('error', () => {
+        ffmpegProcesses[streamName].on('error', () => {
             // Eliminamos el proceso del mapa
-            delete ffmpegProcesses[id];
+            delete ffmpegProcesses[streamName];
 
             // Eliminamos el directorio del flujo
-            removeDirectory(path.join(outputFolder, id), `FFmpeg - ${id}`);
+            removeDirectory(path.join(outputFolder, streamName), `FFmpeg - ${streamName}`);
 
             // Resolvemos la promesa
             resolve();
         });
 
         // Enviamos la señal para terminal el proceso
-        ffmpegProcesses[id].kill('SIGINT');
+        ffmpegProcesses[streamName].kill('SIGINT');
     })
 };
 
