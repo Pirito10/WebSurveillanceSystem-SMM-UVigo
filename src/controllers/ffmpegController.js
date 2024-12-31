@@ -74,7 +74,7 @@ const startFFmpeg = async (streamName, streamUrl, params = {}) => {
             if (err == "Error: ffmpeg was killed with signal SIGINT") {
                 console.log(`[FFmpeg - ${streamName}] Stopped`);
             } else {
-                console.log(`[FFmpeg - ${streamName}] ${err}\n`);
+                console.log(`[FFmpeg - ${streamName}] ${err}`);
                 // Eliminamos el proceso del mapa
                 delete ffmpegProcesses[streamName];
                 // Eliminamos el directorio del flujo
