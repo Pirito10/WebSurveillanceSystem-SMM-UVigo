@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const ffmpeg = require('fluent-ffmpeg');
 const config = require('../../config/default'); // Fichero de configuración
-const { createDirectory } = require('../utils/utils'); // Fichero de útiles
+const { createDirectory, removeDirectory } = require('../utils/utils'); // Fichero de útiles
 
 // Mapa para almacenar procesos de FFmpeg por su ID
 const ffmpegProcesses = {};
@@ -13,6 +13,10 @@ const outputFolder = path.resolve(config.paths.outputFolder);
 
 // Función para lanzar FFmpeg
 const startFFmpeg = async (id, inputUrl, params = {}) => {
+    // Reiniciamos el proceso si ya existía
+    if (ffmpegProcesses[id]) {
+        await stopFFmpeg(id);
+    }
 
     // Creamos el subdirectorio para el ID si no existe
     const streamOutputFolder = path.join(outputFolder, id);
@@ -24,11 +28,6 @@ const startFFmpeg = async (id, inputUrl, params = {}) => {
     // Abrimos el fichero de logs
     const logFilePath = path.join(logsFolder, `${id}.log`);
     const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Abrir en modo append
-
-    // Reiniciamos el proceso si ya existía
-    if (ffmpegProcesses[id]) {
-        await stopFFmpeg(id);
-    }
 
     // Obtenemos los parámetros configurables
     const codec = params.codec;
@@ -68,7 +67,7 @@ const startFFmpeg = async (id, inputUrl, params = {}) => {
         })
         .on('error', (err) => {
             if (err == "Error: ffmpeg was killed with signal SIGINT") {
-                console.log(`[FFmpeg - ${id}] Stopped\n`);
+                console.log(`[FFmpeg - ${id}] Stopped`);
             } else {
                 console.log(`[FFmpeg - ${id}] ${err}\n`);
                 stopFFmpeg(id);
@@ -89,16 +88,24 @@ const startFFmpeg = async (id, inputUrl, params = {}) => {
 const stopFFmpeg = (id) => {
     // Creamos una promesa
     return new Promise((resolve) => {
-        // Escuchamos el evento de error para saber que el proceso ha terminad
+        // Escuchamos el evento de error para saber que el proceso ha terminado
         ffmpegProcesses[id].on('error', () => {
             // Eliminamos el proceso del mapa
             delete ffmpegProcesses[id];
+
+            // Eliminamos el directorio del flujo
+            removeDirectory(path.join(outputFolder, id), `FFmpeg - ${id}`);
+
             // Resolvemos la promesa
             resolve();
         });
+
         // Enviamos la señal para terminal el proceso
         ffmpegProcesses[id].kill('SIGINT');
     })
 };
 
-module.exports = startFFmpeg;
+module.exports = {
+    startFFmpeg,
+    stopFFmpeg
+};
