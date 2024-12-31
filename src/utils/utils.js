@@ -10,6 +10,14 @@ const createDirectory = (directoryPath, source = 'Server') => {
     }
 };
 
+// Función que elimina un directorio
+const removeDirectory = (directoryPath, source = 'Server') => {
+    if (fs.existsSync(directoryPath)) {
+        fs.rmSync(directoryPath, { recursive: true, force: true });
+        console.log(`[${source}] Directory removed: ${directoryPath}\n`);
+    }
+};
+
 // Promisificamos scrypt para usar async/await
 const scrypt = util.promisify(crypto.scrypt);
 
@@ -35,6 +43,7 @@ async function verifyPassword(password, storedHash) {
 
 module.exports = {
     createDirectory,
+    removeDirectory,
     hashPassword,
     verifyPassword,
 };
