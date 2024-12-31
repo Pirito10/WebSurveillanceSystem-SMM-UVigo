@@ -47,8 +47,12 @@ const startFFmpeg = async (streamName, streamUrl, params = {}) => {
         '-bufsize', bufsize,
     ];
 
+    // Obtenemos los parámetros de grabación
+    const recording = params.recording;
+    const recordingParams = recording ? ['-hls_list_size', '60'] : config.ffmpeg.recordingParams;
+
     // Creamos la lista de parámetros completa
-    const allParams = [...config.ffmpeg.baseParams, ...customParams, ...config.ffmpeg.hlsParams];
+    const allParams = [...config.ffmpeg.baseParams, ...customParams, ...recordingParams, ...config.ffmpeg.hlsParams];
 
     // Creamos el comando ffmpeg
     const process = ffmpeg(streamUrl)
@@ -60,7 +64,8 @@ const startFFmpeg = async (streamName, streamUrl, params = {}) => {
             console.log(`\tResolution: ${resolution}`);
             console.log(`\tFramerate: ${framerate}`);
             console.log(`\tPreset: ${preset}`);
-            console.log(`\tBitrate: ${bitrate}\n`);
+            console.log(`\tBitrate: ${bitrate}`);
+            console.log(`\tRecording: ${recording}\n`);
         })
         .on('stderr', (stderrLine) => {
             logStream.write(`${stderrLine}\n`);
