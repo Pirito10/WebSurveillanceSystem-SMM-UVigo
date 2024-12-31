@@ -148,7 +148,7 @@ const recordStream = async (streamName) => {
                 reject();
             })
             .on('end', () => {
-                console.log(`[FFmpeg - ${streamName}] Recording successful`);
+                console.log(`[FFmpeg - ${streamName}] Recording successful\n`);
                 // Resolvemos la promesa devolviendo el fichero resultante
                 resolve(outputFile);
             })
