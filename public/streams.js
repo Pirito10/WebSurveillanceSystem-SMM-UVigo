@@ -114,7 +114,9 @@ const addStream = (streamName, streamUrl, recording = false) => {
     // Creamos el botón de configuración
     const configButton = document.createElement('button');
     configButton.className = 'config-button';
-    configButton.textContent = 'Settings';
+    const configIcon = document.createElement('i');
+    configIcon.className = 'fas fa-cog';
+    configButton.appendChild(configIcon);
     configButton.addEventListener('click', () => {
         configureStream(streamName, streamUrl);
     });
@@ -141,7 +143,9 @@ const addStream = (streamName, streamUrl, recording = false) => {
     // Creamos el botón de guardar grabación
     const saveButton = document.createElement('button');
     saveButton.className = 'save-button';
-    saveButton.textContent = 'Save recording';
+    const saveIcon = document.createElement('i');
+    saveIcon.className = 'fas fa-download';
+    saveButton.appendChild(saveIcon);
     saveButton.disabled = !recording;
     saveButton.addEventListener('click', () => {
         saveRecording(streamName);
@@ -150,7 +154,9 @@ const addStream = (streamName, streamUrl, recording = false) => {
     // Creamos el botón de eliminar
     const deleteButton = document.createElement('button');
     deleteButton.className = 'delete-button';
-    deleteButton.textContent = 'Delete';
+    const deleteIcon = document.createElement('i');
+    deleteIcon.className = 'fas fa-trash';
+    deleteButton.appendChild(deleteIcon);
     deleteButton.addEventListener('click', async () => {
         removeStream(streamName);
     });
