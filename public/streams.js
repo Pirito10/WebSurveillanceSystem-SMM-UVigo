@@ -118,18 +118,23 @@ const addStream = (streamName, streamUrl) => {
         configureStream(streamName, streamUrl);
     });
 
-    // Creamos el botón de comenzar grabación
-    const recordButton = document.createElement('button');
-    recordButton.textContent = 'Start recording';
-    recordButton.addEventListener('click', () => {
-        startRecording();
+    // Creamos el selector de comenzar grabación
+    const recordSwitch = document.createElement('div');
+    const recordSwitchLabel = document.createElement('label');
+    const recordSwitchInput = document.createElement('input');
+    recordSwitchInput.type = 'checkbox';
+    recordSwitchInput.checked = false;
+    recordSwitchInput.addEventListener('change', () => {
+        toggleRecording(streamName, recordSwitchInput.checked);
     });
+    recordSwitchLabel.appendChild(recordSwitchInput);
+    recordSwitch.appendChild(recordSwitchLabel);
 
     // Creamos el botón de guardar grabación
     const saveButton = document.createElement('button');
     saveButton.textContent = 'Save recording';
     saveButton.addEventListener('click', () => {
-        saveRecording();
+        saveRecording(streamName);
     });
 
     // Creamos el botón de eliminar
@@ -139,10 +144,10 @@ const addStream = (streamName, streamUrl) => {
         removeStream(streamName);
     });
 
-    // Añadimos el vídeo a su contenedor, y el contenedor al grid
+    // Añadimos el vídeo a su contenedor, los botones, y el contenedor al grid
     videoWrapper.appendChild(video);
     videoWrapper.appendChild(configButton);
-    videoWrapper.appendChild(recordButton);
+    videoWrapper.appendChild(recordSwitch);
     videoWrapper.appendChild(saveButton);
     videoWrapper.appendChild(deleteButton);
     videosContainer.appendChild(videoWrapper);
@@ -244,6 +249,31 @@ const requestFFmpeg = async (streamName, streamUrl) => {
         console.error(error);
     }
 };
+
+// Función para iniciar la grabación de un flujo
+const toggleRecording = async (streamName, isRecording) => {
+    // Actualizamos el estado de grabación del flujo en la base de datos
+    try {
+        const response = await fetch(`/api/streams/${streamName}/record`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ isRecording }),
+        });
+
+        if (response.ok) {
+            console.log(`Recording ${isRecording ? 'started' : 'stopped'} for stream ${streamName}`);
+        } else {
+            console.error(await response.text());
+        }
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+// Función para guardar la grabación de un flujo
+const saveRecording = async () => { };
 
 // Función para cargar los flujos del usuario desde el servidor
 window.onload = async () => {
