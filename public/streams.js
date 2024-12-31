@@ -126,6 +126,8 @@ const addStream = (streamName, streamUrl, recording = false) => {
     recordSwitchInput.checked = recording;
     recordSwitchInput.addEventListener('change', () => {
         toggleRecording(streamName, streamUrl, recordSwitchInput.checked);
+        // Cambiamos el estado de botón de guardar grabación
+        saveButton.disabled = !recordSwitchInput.checked;
     });
     recordSwitchLabel.appendChild(recordSwitchInput);
     recordSwitch.appendChild(recordSwitchLabel);
@@ -133,6 +135,7 @@ const addStream = (streamName, streamUrl, recording = false) => {
     // Creamos el botón de guardar grabación
     const saveButton = document.createElement('button');
     saveButton.textContent = 'Save recording';
+    saveButton.disabled = !recording;
     saveButton.addEventListener('click', () => {
         saveRecording(streamName);
     });
