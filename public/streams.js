@@ -23,6 +23,7 @@ const adjustGrid = () => {
 const addStream = (streamName, streamUrl) => {
     // Creamos un contenedor para cada flujo
     const videoWrapper = document.createElement('div');
+    videoWrapper.id = streamName;
 
     // Creamos su elemento 'video'
     const video = document.createElement('video');
@@ -67,14 +68,44 @@ const addStream = (streamName, streamUrl) => {
         openConfigModal(streamName, streamUrl);
     });
 
+    // Creamos el botón de eliminar
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.addEventListener('click', async () => {
+        removeStream(streamName);
+    });
+
     // Añadimos el vídeo a su contenedor, y el contenedor al grid
     videoWrapper.appendChild(video);
     videoWrapper.appendChild(configButton);
+    videoWrapper.appendChild(deleteButton);
     videosContainer.appendChild(videoWrapper);
 
     // Reajustamos el grid
     adjustGrid();
 };
+
+// Función para eliminar un flujo
+const removeStream = async (streamName) => {
+    try {
+        // Eliminamos el flujo de la base de datos
+        const response = await fetch(`/api/streams/${streamName}`, {
+            method: 'DELETE',
+        });
+
+        if (response.ok) {
+            // Eliminamos el flujo del grid
+            document.getElementById(streamName).remove();
+
+            // Reajustamos el grid
+            adjustGrid();
+        } else {
+            console.error(await response.text());
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
 
 // Listener para el botón de añadir flujo
 document.getElementById('addStreamButton').addEventListener('click', async () => {
@@ -177,7 +208,7 @@ const requestFFmpeg = async (streamName, streamUrl) => {
         });
 
         if (!response.ok) {
-            console.error(`Failed to start FFmpeg for stream ${streamName}:`, await response.text());
+            console.error(await response.text());
         }
     } catch (error) {
         console.error(error);
@@ -208,8 +239,12 @@ const openConfigModal = (streamName, streamUrl) => {
             resolution: formData.get('resolution'),
             framerate: formData.get('framerate'),
             preset: formData.get('preset'),
-            bitrate: `${formData.get('bitrate')}k`,
+            bitrate: formData.get('bitrate'),
         };
+
+        if (params.bitrate) {
+            params.bitrate = `${params.bitrate}k`;
+        }
 
         // Actualizamos los parámetros del flujo en la base de datos
         try {
@@ -221,16 +256,15 @@ const openConfigModal = (streamName, streamUrl) => {
                 body: JSON.stringify({ params }),
             });
 
-            if (!response.ok) {
-                console.error('Failed to update stream parameters in the database:', await response.text());
-                return;
+            if (response.ok) {
+                // Reiniciamos el flujo
+                requestFFmpeg(streamName, streamUrl);
+
+                // Ocultamos el modal
+                modal.style.display = 'none';
+            } else {
+                console.error(await response.text());
             }
-
-            // Reiniciamos el flujo
-            requestFFmpeg(streamName, streamUrl);
-
-            // Ocultamos el modal
-            modal.style.display = 'none';
         } catch {
             console.error(error);
         }
