@@ -58,7 +58,7 @@ const startFFmpeg = async (streamName, streamUrl, params = {}) => {
     // Creamos la lista de parámetros completa
     const allParams = [...config.ffmpeg.baseParams, ...customParams, ...recordingParams, ...config.ffmpeg.hlsParams];
 
-    // Creamos el comando ffmpeg
+    // Creamos el comando FFmpeg
     const process = ffmpeg(streamUrl)
         .outputOptions(allParams) // Parámetros
         .output(outputFile) // Fichero de salida
@@ -70,7 +70,7 @@ const startFFmpeg = async (streamName, streamUrl, params = {}) => {
             console.log(`\tPreset: ${preset}`);
             console.log(`\tBitrate: ${bitrate}`);
             console.log(`\tRecording: ${recording}`);
-            console.log(`\tDuration: ${recordingDuration}s`);
+            console.log(`\tDuration: ${recordingDuration}s\n`);
         })
         .on('stderr', (stderrLine) => {
             logStream.write(`${stderrLine}\n`);
@@ -126,7 +126,38 @@ const stopFFmpeg = (streamName) => {
     });
 };
 
+// Función para generar un fichero MP4 a partir de una grabación
+const recordStream = async (streamName) => {
+    // Creamos una promesa
+    return new Promise((resolve, reject) => {
+        // Obtenemos el manifiesto de HLS
+        const inputFile = path.join(outputFolder, streamName, 'output.m3u8');
+        // Creamos el fichero de salida
+        const outputFile = path.join(outputFolder, streamName, `output.mp4`);
+
+        // Ejecutamos el comando FFmpeg
+        ffmpeg()
+            .input(inputFile) // Fichero de entrada
+            .outputOptions('-c copy') // Parámetros
+            .output(outputFile) // Fichero de salida
+            .on('start', () => {
+                console.log(`[FFmpeg - ${streamName}] Recording to file ${outputFile}`);
+            })
+            .on('error', (err) => {
+                console.error(`[FFmpeg - ${streamName}] ${err}`);
+                reject();
+            })
+            .on('end', () => {
+                console.log(`[FFmpeg - ${streamName}] Recording successful`);
+                // Resolvemos la promesa devolviendo el fichero resultante
+                resolve(outputFile);
+            })
+            .run();
+    });
+};
+
 module.exports = {
     startFFmpeg,
-    stopFFmpeg
+    stopFFmpeg,
+    recordStream
 };
