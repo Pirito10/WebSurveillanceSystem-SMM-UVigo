@@ -114,6 +114,7 @@ const addStream = (streamName, streamUrl, recording = false) => {
     // Creamos el selector de comenzar grabación
     const recordSwitch = document.createElement('div');
     recordSwitch.className = 'switch-container';
+    recordSwitch.title = 'Toggle recording';
     const recordSwitchLabel = document.createElement('label');
     recordSwitchLabel.className = 'switch';
     const recordSwitchInput = document.createElement('input');
@@ -133,6 +134,7 @@ const addStream = (streamName, streamUrl, recording = false) => {
     // Creamos el botón de guardar grabación
     const saveButton = document.createElement('button');
     saveButton.className = 'save-button';
+    saveButton.title = 'Save recording';
     const saveIcon = document.createElement('i');
     saveIcon.className = 'fas fa-download';
     saveButton.appendChild(saveIcon);
@@ -144,6 +146,7 @@ const addStream = (streamName, streamUrl, recording = false) => {
     // Creamos el botón de configuración
     const configButton = document.createElement('button');
     configButton.className = 'config-button';
+    configButton.title = 'Settings';
     const configIcon = document.createElement('i');
     configIcon.className = 'fas fa-cog';
     configButton.appendChild(configIcon);
@@ -154,6 +157,7 @@ const addStream = (streamName, streamUrl, recording = false) => {
     // Creamos el botón de eliminar
     const deleteButton = document.createElement('button');
     deleteButton.className = 'delete-button';
+    deleteButton.title = 'Remove stream'
     const deleteIcon = document.createElement('i');
     deleteIcon.className = 'fas fa-trash';
     deleteButton.appendChild(deleteIcon);
