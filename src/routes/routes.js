@@ -1,9 +1,9 @@
 const express = require('express');
 const path = require('path');
-const startFFmpeg = require('../controllers/ffmpegController');
-const db = require('../utils/db');
-const { hashPassword, verifyPassword } = require('../utils/utils');
 const config = require('../../config/default');
+const db = require('../utils/db');
+const { startFFmpeg, stopFFmpeg } = require('../controllers/ffmpegController');
+const { hashPassword, verifyPassword } = require('../utils/utils');
 
 const router = express.Router();
 const loginHTML = config.paths.htmlFiles.login;
@@ -45,7 +45,7 @@ router.post('/api/login', async (req, res) => {
                 res.status(401).send('Wrong password');
             }
         } else {
-            res.status(401).send('User does not exist');
+            res.status(404).send('User does not exist');
         }
     } catch (error) {
         console.error(error);
@@ -133,6 +133,31 @@ router.put('/api/streams/:name', (req, res) => {
     }
 });
 
+// Endpoint para eliminar un flujo de la base de datos
+router.delete('/api/streams/:name', async (req, res) => {
+    // Obtenemos el nombre del flujo de la solicitud
+    const streamName = req.params.name;
+
+    try {
+        // Hacemos una consulta a la base de datos para obtener el flujo correspondiente al nombre introducido
+        const stream = db.prepare('SELECT * FROM streams WHERE name = ?').get(streamName);
+
+        if (stream) {
+            // Eliminamos el flujo de la base de datos
+            db.prepare('DELETE FROM streams WHERE name = ?').run(streamName);
+
+            // Detenemos el proceso FFmpeg
+            stopFFmpeg(streamName);
+            res.status(200).send();
+        } else {
+            res.status(404).send('Stream does not exist');
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal error');
+    }
+});
+
 // Endpoint para devolver los flujos de un usuario
 router.get('/api/streams/:userID', (req, res) => {
     // Obtenemos el usuario de la solicitud
@@ -170,7 +195,6 @@ router.post('/api/start-ffmpeg', (req, res) => {
     const streamName = req.body.streamName;
     const streamUrl = req.body.streamUrl;
 
-    // Intentamos ejecutar el comando FFmpeg correspondiente
     try {
         // Obtenemos los parámetros configurables del flujo de la base de datos
         const params = db.prepare(`
@@ -179,6 +203,7 @@ router.post('/api/start-ffmpeg', (req, res) => {
             WHERE name = ?
         `).get(streamName);
 
+        // Iniciamos el proceso FFmpeg
         startFFmpeg(streamName, streamUrl, params);
         res.status(200).send();
     } catch (error) {
