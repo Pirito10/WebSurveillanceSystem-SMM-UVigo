@@ -65,7 +65,7 @@ const addStream = (streamName, streamUrl) => {
     const configButton = document.createElement('button');
     configButton.textContent = 'Settings';
     configButton.addEventListener('click', () => {
-        openConfigModal(streamName, streamUrl);
+        configureStream(streamName, streamUrl);
     });
 
     // Creamos el botón de eliminar
@@ -216,7 +216,7 @@ const requestFFmpeg = async (streamName, streamUrl) => {
 };
 
 // Función para abrir la ventana de configuración
-const openConfigModal = (streamName, streamUrl) => {
+const configureStream = (streamName, streamUrl) => {
     // Mostramos la ventana
     const modal = document.getElementById('configModal');
     modal.style.display = 'flex';
