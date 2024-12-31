@@ -177,7 +177,7 @@ router.get('/api/streams/:userID', (req, res) => {
 
     try {
         // Hacemos una consulta a la base de datos para obtener los flujos del usuario
-        const streams = db.prepare('SELECT id, name, url FROM streams WHERE user_id = ?').all(userID);
+        const streams = db.prepare('SELECT id, name, url, recording FROM streams WHERE user_id = ?').all(userID);
         // Devolvemos la lista de flujos en la respuesta
         res.status(200).json(streams);
     } catch (error) {
