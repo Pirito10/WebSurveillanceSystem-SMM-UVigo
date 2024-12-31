@@ -48,12 +48,12 @@ const startFFmpeg = async (streamName, streamUrl, params = {}) => {
     ];
 
     // Obtenemos los parámetros de grabación
-    const recording = params.recording === 1 ? 'true' : 'false';
+    const recording = params.recording === 1;
     const recordingDuration = params.recordingDuration;
     // Calculamos los segmentos necesarios
     const segmentDuration = config.ffmpeg.keyframeInterval / framerate;
     const segmentsNeeded = Math.ceil(recordingDuration / segmentDuration);
-    const recordingParams = recording ? [`-hls_list_size ${segmentsNeeded}`] : config.ffmpeg.recordingParams.disabled;
+    const recordingParams = recording ? ['-hls_list_size', `${segmentsNeeded}`] : config.ffmpeg.recordingParams.disabled;
 
     // Creamos la lista de parámetros completa
     const allParams = [...config.ffmpeg.baseParams, ...customParams, ...recordingParams, ...config.ffmpeg.hlsParams];

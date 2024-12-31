@@ -29,7 +29,7 @@ module.exports = {
             bitrate: '1500k' // Tasa de bits del video
         },
         recordingParams: {
-            disabled: '-hls_list_size 5', // Número máximo de segmentos en la lista
+            disabled: ['-hls_list_size', '5'], // Número máximo de segmentos en la lista
             duration: '60' // Duración de la grabación
         },
         hlsParams: [
