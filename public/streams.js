@@ -70,7 +70,7 @@ const adjustGrid = () => {
 };
 
 // Función para añadir un nuevo flujo
-const addStream = (streamName, streamUrl) => {
+const addStream = (streamName, streamUrl, recording = false) => {
     // Creamos un contenedor para cada flujo
     const videoWrapper = document.createElement('div');
     videoWrapper.id = streamName;
@@ -123,7 +123,7 @@ const addStream = (streamName, streamUrl) => {
     const recordSwitchLabel = document.createElement('label');
     const recordSwitchInput = document.createElement('input');
     recordSwitchInput.type = 'checkbox';
-    recordSwitchInput.checked = false;
+    recordSwitchInput.checked = recording;
     recordSwitchInput.addEventListener('change', () => {
         toggleRecording(streamName, streamUrl, recordSwitchInput.checked);
     });
@@ -299,12 +299,13 @@ window.onload = async () => {
                 // Obtenemos el nombre y URL del flujo
                 const streamName = stream.name;
                 const streamUrl = stream.url;
+                const recording = stream.recording;
 
                 // Llamamos al correspondiente comando FFmpeg en el servidor
                 requestFFmpeg(streamName, streamUrl);
 
                 // Añadimos el flujo a la interfaz
-                addStream(streamName, streamUrl);
+                addStream(streamName, streamUrl, recording);
             });
         } else {
             console.error(await response.text());
