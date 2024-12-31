@@ -118,6 +118,13 @@ const addStream = (streamName, streamUrl) => {
         configureStream(streamName, streamUrl);
     });
 
+    // Creamos el botón de comenzar grabación
+    const recordButton = document.createElement('button');
+    recordButton.textContent = 'Start recording';
+    recordButton.addEventListener('click', () => {
+        startRecording();
+    });
+
     // Creamos el botón de eliminar
     const deleteButton = document.createElement('button');
     deleteButton.textContent = 'Delete';
@@ -128,6 +135,7 @@ const addStream = (streamName, streamUrl) => {
     // Añadimos el vídeo a su contenedor, y el contenedor al grid
     videoWrapper.appendChild(video);
     videoWrapper.appendChild(configButton);
+    videoWrapper.appendChild(recordButton);
     videoWrapper.appendChild(deleteButton);
     videosContainer.appendChild(videoWrapper);
 
