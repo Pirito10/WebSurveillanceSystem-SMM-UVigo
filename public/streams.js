@@ -252,7 +252,7 @@ const requestFFmpeg = async (streamName, streamUrl) => {
 };
 
 // Función para cambiar el estado de la grabación de un flujo
-const toggleRecording = async (streamName, streamUrl, isRecording) => {
+const toggleRecording = async (streamName, streamUrl, recording) => {
     // Actualizamos el estado de grabación del flujo en la base de datos
     try {
         const response = await fetch(`/api/streams/${streamName}/record`, {
@@ -260,7 +260,7 @@ const toggleRecording = async (streamName, streamUrl, isRecording) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ isRecording }),
+            body: JSON.stringify({ recording }),
         });
 
         if (response.ok) {
@@ -275,7 +275,27 @@ const toggleRecording = async (streamName, streamUrl, isRecording) => {
 };
 
 // Función para guardar la grabación de un flujo
-const saveRecording = async () => { };
+const saveRecording = async (streamName) => {
+    try {
+        // Hacemos una solicitud al servidor para descargar la grabación
+        const response = await fetch(`/api/streams/${streamName}/download`);
+
+        if (response.ok) {
+            // Creamos un enlace temporal para descargar el archivo
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${streamName}.mp4`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } else {
+            console.error(await response.text());
+        }
+    } catch (error) {
+        console.error(error);
+    }
+};
 
 // Función para cargar los flujos del usuario desde el servidor
 window.onload = async () => {
