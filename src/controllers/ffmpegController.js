@@ -29,7 +29,7 @@ const startFFmpeg = async (streamName, streamUrl, params = {}) => {
     const logFilePath = path.join(logsFolder, `${streamName}.log`);
     const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Abrir en modo append
 
-    // Obtenemos los parámetros configurables
+    // Obtenemos los parámetros de configuración
     const codec = params.codec;
     const resolution = params.resolution;
     const framerate = params.framerate;
@@ -48,8 +48,12 @@ const startFFmpeg = async (streamName, streamUrl, params = {}) => {
     ];
 
     // Obtenemos los parámetros de grabación
-    const recording = params.recording;
-    const recordingParams = recording ? ['-hls_list_size', '60'] : config.ffmpeg.recordingParams;
+    const recording = params.recording === 1 ? 'true' : 'false';
+    const recordingDuration = params.recordingDuration;
+    // Calculamos los segmentos necesarios
+    const segmentDuration = config.ffmpeg.keyframeInterval / framerate;
+    const segmentsNeeded = Math.ceil(recordingDuration / segmentDuration);
+    const recordingParams = recording ? [`-hls_list_size ${segmentsNeeded}`] : config.ffmpeg.recordingParams.disabled;
 
     // Creamos la lista de parámetros completa
     const allParams = [...config.ffmpeg.baseParams, ...customParams, ...recordingParams, ...config.ffmpeg.hlsParams];
@@ -62,10 +66,11 @@ const startFFmpeg = async (streamName, streamUrl, params = {}) => {
             console.log(`[FFmpeg - ${streamName}] Starting on URL ${streamUrl} with parameters:`);
             console.log(`\tCodec: ${codec}`);
             console.log(`\tResolution: ${resolution}`);
-            console.log(`\tFramerate: ${framerate}`);
+            console.log(`\tFramerate: ${framerate}fps`);
             console.log(`\tPreset: ${preset}`);
             console.log(`\tBitrate: ${bitrate}`);
-            console.log(`\tRecording: ${recording}\n`);
+            console.log(`\tRecording: ${recording}`);
+            console.log(`\tDuration: ${recordingDuration}s`);
         })
         .on('stderr', (stderrLine) => {
             logStream.write(`${stderrLine}\n`);

@@ -15,10 +15,11 @@ module.exports = {
         }
     },
     ffmpeg: {
+        keyframeInterval: '60', // Un keyframe cada 60 frames
         baseParams: [
-            '-tune', 'zerolatency', // Ajuste para transmisión en vivo
+            '-tune zerolatency', // Ajuste para transmisión en vivo
             '-an', // Sin audio
-            '-g 60' // Un keyframe cada 60 frames
+            '-g', this.keyframeInterval
         ],
         defaultParams: {
             codec: 'libx264', // Codec de video
@@ -28,13 +29,13 @@ module.exports = {
             bitrate: '1500k' // Tasa de bits del video
         },
         recordingParams: {
-            disabled: ['-hls_list_size', '5'], // Número máximo de segmentos en la lista
+            disabled: '-hls_list_size 5', // Número máximo de segmentos en la lista
             duration: '60' // Duración de la grabación
         },
         hlsParams: [
-            '-f', 'hls', // Formato de salida
-            '-hls_time', '1', // Duración de los segmentos
-            '-hls_flags', 'delete_segments+independent_segments+append_list' // Flags adicionales para HLS
+            '-f hls', // Formato de salida
+            '-hls_time 1', // Duración de los segmentos
+            '-hls_flags delete_segments+independent_segments+append_list' // Flags adicionales para HLS
         ]
     }
 };
