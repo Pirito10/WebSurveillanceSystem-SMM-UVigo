@@ -203,6 +203,7 @@ const configureStream = (streamName, streamUrl) => {
             framerate: formData.get('framerate'),
             preset: formData.get('preset'),
             bitrate: formData.get('bitrate') ? `${formData.get('bitrate')}k` : '',
+            recordingDuration: formData.get('recordingDuration')
         };
 
         // Actualizamos los parámetros del flujo en la base de datos
