@@ -120,7 +120,7 @@ router.put('/api/streams/:name', (req, res) => {
 
     try {
         // Actualizamos los parámetros del flujo en la base de datos
-        db.prepare(`UPDATE streams SET codec = ?, resolution = ?, framerate = ?, preset = ?, bitrate = ? WHERE name = ?`).run(params.codec || config.ffmpeg.defaultParams.codec, params.resolution || config.ffmpeg.defaultParams.resolution, params.framerate || config.ffmpeg.defaultParams.framerate, params.preset || config.ffmpeg.defaultParams.preset, params.bitrate || config.ffmpeg.defaultParams.bitrate, streamName);
+        db.prepare(`UPDATE streams SET codec = ?, resolution = ?, framerate = ?, preset = ?, bitrate = ?, recordingDuration = ? WHERE name = ?`).run(params.codec || config.ffmpeg.defaultParams.codec, params.resolution || config.ffmpeg.defaultParams.resolution, params.framerate || config.ffmpeg.defaultParams.framerate, params.preset || config.ffmpeg.defaultParams.preset, params.bitrate || config.ffmpeg.defaultParams.bitrate, params.recordingDuration || config.ffmpeg.recordingParams.duration, streamName);
 
         res.status(200).send();
     } catch (error) {
@@ -209,7 +209,7 @@ router.post('/api/start-ffmpeg', (req, res) => {
 
     try {
         // Obtenemos los parámetros configurables del flujo de la base de datos
-        const params = db.prepare(`SELECT codec, resolution, framerate, preset, bitrate, recording FROM streams WHERE name = ?`).get(streamName);
+        const params = db.prepare(`SELECT codec, resolution, framerate, preset, bitrate, recording, recordingDuration FROM streams WHERE name = ?`).get(streamName);
 
         // Iniciamos el proceso FFmpeg
         startFFmpeg(streamName, streamUrl, params);
