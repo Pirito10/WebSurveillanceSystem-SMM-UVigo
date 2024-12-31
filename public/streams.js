@@ -111,16 +111,6 @@ const addStream = (streamName, streamUrl, recording = false) => {
         video.src = videoSrc;
     }
 
-    // Creamos el botón de configuración
-    const configButton = document.createElement('button');
-    configButton.className = 'config-button';
-    const configIcon = document.createElement('i');
-    configIcon.className = 'fas fa-cog';
-    configButton.appendChild(configIcon);
-    configButton.addEventListener('click', () => {
-        configureStream(streamName, streamUrl);
-    });
-
     // Creamos el selector de comenzar grabación
     const recordSwitch = document.createElement('div');
     recordSwitch.className = 'switch-container';
@@ -151,6 +141,16 @@ const addStream = (streamName, streamUrl, recording = false) => {
         saveRecording(streamName);
     });
 
+    // Creamos el botón de configuración
+    const configButton = document.createElement('button');
+    configButton.className = 'config-button';
+    const configIcon = document.createElement('i');
+    configIcon.className = 'fas fa-cog';
+    configButton.appendChild(configIcon);
+    configButton.addEventListener('click', () => {
+        configureStream(streamName, streamUrl);
+    });
+
     // Creamos el botón de eliminar
     const deleteButton = document.createElement('button');
     deleteButton.className = 'delete-button';
@@ -164,9 +164,9 @@ const addStream = (streamName, streamUrl, recording = false) => {
     // Creamos un contenedor para los botones
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'button-container';
-    buttonContainer.appendChild(configButton);
     buttonContainer.appendChild(recordSwitch);
     buttonContainer.appendChild(saveButton);
+    buttonContainer.appendChild(configButton);
     buttonContainer.appendChild(deleteButton);
 
     // Añadimos el vídeo  y los botones a su contenedor, y el contenedor al grid
