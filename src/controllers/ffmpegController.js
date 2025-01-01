@@ -59,8 +59,9 @@ const startFFmpeg = async (streamName, streamUrl, params = {}) => {
     const allParams = [...config.ffmpeg.baseParams, ...customParams, ...recordingParams, ...config.ffmpeg.hlsParams];
 
     // Creamos el comando FFmpeg
-    const process = ffmpeg(streamUrl)
-        .outputOptions(allParams) // Parámetros
+    const process = ffmpeg()
+        .input(streamUrl) // URL de entrada
+        .outputOptions(allParams) // Parámetros de salida
         .output(outputFile) // Fichero de salida
         .on('start', () => {
             console.log(`[FFmpeg - ${streamName}] Starting on URL ${streamUrl} with parameters:`);
@@ -143,7 +144,8 @@ const recordStream = async (streamName) => {
         // Ejecutamos el comando FFmpeg
         ffmpeg()
             .input(inputFile) // Fichero de entrada
-            .outputOptions('-c copy') // Parámetros
+            .inputOptions('-live_start_index 0') // Parámetros de entrada
+            .outputOptions('-c copy') // Parámetros de salida
             .output(outputFile) // Fichero de salida
             .on('start', () => {
                 console.log(`[FFmpeg - ${streamName}] Recording to file ${outputFile}`);
