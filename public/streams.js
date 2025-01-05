@@ -89,7 +89,7 @@ const addStream = (streamName, streamUrl, recording = false) => {
                 default: {
                     maxLoadTimeMs: 1000,
                     timeoutRetry: {
-                        maxNumRetry: 10
+                        maxNumRetry: 60
                     }
                 }
             }
