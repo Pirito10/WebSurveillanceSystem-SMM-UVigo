@@ -1,14 +1,14 @@
 {
-  "name": "smm",
+  "name": "web-surveillance-system",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
     "start": "node src/server.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "Videosecurity web system",
+  "author": "Aarón Riveiro Vilar",
+  "license": "MIT",
+  "description": "A Web Surveillance System developed as the project for subject SMM at Telecommunications Engineering at Universidad de Vigo",
   "dependencies": {
     "better-sqlite3": "^11.6.0",
     "express": "^4.21.1",
