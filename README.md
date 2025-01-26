@@ -4,4 +4,4 @@ Web Surveillance System project for "[Servicios Multimedia](https://secretaria.u
 
 # Documentation
 
-Refer to [**Documentacion.pdf**](Documentacion.pdf) for an in-depth explanation of the project, how it works, how to run it, and more.
+Refer to [**Memoria.pdf**](docs/Memoria.pdf) for an in-depth explanation of the project, how it works, how to run it, and more.
