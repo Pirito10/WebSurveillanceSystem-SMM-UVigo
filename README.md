@@ -1,5 +1,5 @@
 # Web Surveillance System
-_Web Surveillance System_ is a **Video Surveillance Web Application** developed as part of the course "[Servicios Multimedia](https://secretaria.uvigo.gal/docnet-nuevo/guia_docent/?ensenyament=V05G306V01&assignatura=V05G306V01401&any_academic=2024_25)" in the Telecommunications Engineering Degree at the Universidad de Vigo (2024 - 2025).
+_Web Surveillance System_ is a **Video Surveillance Web Application** developed as part of the course "[Servicios Multimedia](https://secretaria.uvigo.gal/docnet-nuevo/guia_docent/?centre=305&ensenyament=V05G301V01&assignatura=V05G301V01401&any_academic=2024_25)" in the Telecommunications Engineering Degree at the Universidad de Vigo (2024 - 2025).
 
 ## About The Project
 This project integrates a web-based application designed to facilitate the management, processing, and playback of video streams for surveillance purposes.
